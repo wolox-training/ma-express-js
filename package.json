@@ -1,0 +1,111 @@
+{
+  "name": "WTraining",
+  "version": "0.1.0",
+  "description": "WTraining",
+  "engines": {
+    "node": "10.14.1",
+    "npm": "6.4.1"
+  },
+  "scripts": {
+    "console": "node console.js",
+    "cover": "npm run test -- --coverage",
+    "test": "NODE_ENV=testing jest --runInBand --forceExit --detectOpenHandles --passWithNoTests",
+    "test-inspect": "NODE_ENV=testing node --inspect --debug-brk jest",
+    "eslint-check": "eslint --print-config .eslintrc.js --ignore-pattern ./.eslintrc.js | eslint-config-prettier-check",
+    "lint": "eslint \"**/*.js\" --ignore-pattern ./.eslintrc.js",
+    "lint-diff": "git diff --diff-filter=ACM --name-only --cached --relative | grep \\\\.js$ | xargs eslint",
+    "lint-fix": "npm run lint -- --fix",
+    "outdated": "npm outdated --depth 0",
+    "pretest": "npm run lint",
+    "start-dev": "nodemon --inspect server.js",
+    "prestart-dev": "npm run lint",
+    "migrations": "sequelize db:migrate",
+    "start": "node server.js",
+    "seed": "sequelize db:seed:all",
+    "create-seed": "sequelize seed:generate --name"
+  },
+  "cacheDirectories": [
+    "node_modules"
+  ],
+  "main": "app.js",
+  "author": "Wolox",
+  "homepage": "https://github.com/wolox-training/ma-express-js.git",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wolox-training/ma-express-js.git.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wolox-training/ma-express-js.git/issues",
+    "email": "tls@wolox.com.ar"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/console.js",
+      "!**/node_modules/**",
+      "!**/build/**",
+      "!**/migrations/**",
+      "!**/config/**",
+      "!**/scripts/**"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ],
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    }
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "jwt-simple": "^0.5.1",
+    "sequelize": "^5.21.5",
+    "factory-girl": "^5.0.4",
+    "pg": "^7.4.1",
+    "umzug": "^2.1.0",
+    "express-wolox-logger": "^2.0.0",
+    "axios": "^0.19.2",
+    "swagger-ui-express": "^4.0.7"
+  },
+  "devDependencies": {
+    "babel": "6.23.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0",
+    "supertest": "^4.0.2",
+    "babel-preset-es2015": "6.24.1",
+    "dotenv": "^8.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-wolox": "^4.0.0",
+    "eslint-config-wolox-node": "^3.0.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-prettier": "^3.0.1",
+    "husky": "^4.2.3",
+    "istanbul": "^0.4.3",
+    "mocha": "^7.1.0",
+    "mocha-lcov-reporter": "^1.2.0",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.15.3",
+    "prettier-eslint": "^9.0.1",
+    "sequelize-cli": "^5.5.1",
+    "prompt": "^1.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint-diff",
+      "pre-push": "npm test"
+    }
+  }
+}
