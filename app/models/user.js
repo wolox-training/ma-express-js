@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
-      last_name: {
+      lastName: {
         type: DataTypes.STRING,
         allowNull: false
       },
@@ -29,7 +29,9 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     {
-      timestamps: false
+      underscored: true,
+      timestamps: true,
+      paranoid: true
     }
   );
   return User;

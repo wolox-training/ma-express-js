@@ -25,6 +25,17 @@ module.exports = {
       password: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      deletedAt: {
+        type: Sequelize.DATE
       }
     }),
 
@@ -52,6 +63,17 @@ module.exports = {
       password: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      deletedAt: {
+        type: Sequelize.DATE
       }
     })
 };
