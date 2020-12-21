@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    const createdTable = queryInterface.createTable('users', {
+  up: (queryInterface, Sequelize) =>
+    queryInterface.createTable('users', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      lastname: {
+      last_name: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -26,12 +26,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       }
-    });
-    return createdTable;
-  },
+    }),
 
-  down: (queryInterface, Sequelize) => {
-    const dropedTable = queryInterface.dropTable('users', {
+  down: (queryInterface, Sequelize) =>
+    queryInterface.dropTable('users', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -41,7 +39,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      lastname: {
+      last_name: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -55,7 +53,5 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       }
-    });
-    return dropedTable;
-  }
+    })
 };
