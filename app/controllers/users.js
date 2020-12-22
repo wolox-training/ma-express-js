@@ -1,8 +1,8 @@
-const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-const User = require('../models/user.js');
+const { User } = require('../models');
 const errors = require('../middlewares/errors');
+const logger = require('../logger');
 
 // Verifica la validez de la contraseña (alfanumérica > 7)
 const passwordLength = password => {
@@ -12,56 +12,55 @@ const passwordLength = password => {
   return isValid;
 };
 
+// Hashea el password mediante bcrypt
+const hashPassword = async password => {
+  const salt = await bcrypt.genSaltSync(10);
+  const hashedPass = await bcrypt.hashSync(password, salt);
+  return hashedPass;
+};
+
 // Verifica la validez y el dominio del email
 const emailValidation = email => {
-  const emailRegex = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i;
-  const emailValid = email.includes('@wolox.com.ar');
-  const isValid = emailRegex && emailValid;
+  const stringLength = email.length;
+  const testLength = stringLength > 13;
+  const testDomain = email.substring(stringLength - 13) === '@wolox.com.ar';
+  const isValid = testLength && testDomain;
   return isValid;
 };
 
-// Hashea el password mediante bcrypt
-const hashPassword = password => {
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) return Promise.reject(errors.hashError(err));
-    bcrypt.hash(password, salt, (error, hash) => {
-      if (error) return Promise.reject(errors.hashError(error));
-      return hash;
-    });
-    return false;
-  });
+const mapRequest = body => {
+  const lastName = body.last_name;
+  return lastName;
 };
 
 exports.register = async (req, res, next) => {
+  const { email, password, name } = req.body;
+  const lastName = mapRequest(req.body);
   try {
-    const { email, password, name, last_name } = req.body;
     // Verifico que el request contenga todos los campos
-    const userValid = email && password && name && last_name;
-    if (!userValid) res.send('Missing fields.');
-    const newUser = User.build({ email, password, name, last_name });
+    const userValid = email && password && name && lastName;
+    if (!userValid) res.json({ error: 'Missing fields.' });
 
     // Verifico que el mail sea válido
-    const validEmail = emailValidation(newUser.email);
-    if (!validEmail) res.send('Invalid email');
+    const validEmail = emailValidation(email);
+    if (!validEmail) res.json({ error: 'Invalid email.' });
 
     // Verifico que el email no exista previamente
-    const emailExists = await User.findOne({
-      where: {
-        email: {
-          [Op.eq]: newUser.email
-        }
-      }
-    });
-    if (emailExists) res.send('Email already exists.');
+    const emailExists = await User.findOne({ where: { email } });
+    if (emailExists) return res.send({ error: 'Email already exists.' });
 
     // Verifico la longitud y composición de la contraseña
-    const validPass = passwordLength(newUser.password);
-    if (!validPass) res.send('Invalid password');
-    const hashedPassword = hashPassword(newUser.password);
+    const validPass = passwordLength(password);
+    if (!validPass) return res.json({ error: 'Invalid password.' });
+    const hashedPassword = await hashPassword(password);
 
-    // res.send(userValid);
-    return res.send({ user: userValid, pass: hashedPassword });
+    // Creo el nuevo usuario
+    const newUser = await User.create({ email, password: hashedPassword, name, lastName });
+    if (!newUser) return res.json({ error: 'DB error.' });
+
+    return res.json({ email });
   } catch (error) {
-    return next(errors.notFound('User not found'));
+    logger.error(error);
+    return next(errors.DEFAULT_ERROR);
   }
 };
