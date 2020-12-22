@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
-
-const { User } = require('../models');
 const errors = require('../errors');
+const userService = require('../services/users');
 
 const passwordLength = password => {
   const characters = /^[a-z0-9]+$/i;
@@ -16,7 +15,7 @@ const hashPassword = async password => {
 
 const emailValidation = email => email.length > 13 && email.substring(email.length - 13) === '@wolox.com.ar';
 
-exports.register = async (req, res, next) => {
+exports.signUp = async (req, res, next) => {
   const { email: dirtEmail, password, name, last_name: lastName } = req.body;
   const email = dirtEmail.trim();
   try {
@@ -29,11 +28,11 @@ exports.register = async (req, res, next) => {
     const validPass = passwordLength(password);
     if (!validPass) throw errors.createUserError('Invalid password.');
 
-    const emailExists = await User.findOne({ where: { email } });
+    const emailExists = await userService.emailExists(email);
     if (emailExists) throw errors.createUserError('Email already exists.');
 
     const hashedPassword = await hashPassword(password);
-    const newUser = await User.create({ email, password: hashedPassword, name, lastName });
+    const newUser = await userService.create(email, hashedPassword, name, lastName);
     if (!newUser) throw errors.databaseError('DB error.');
 
     return res.sendStatus(204);
