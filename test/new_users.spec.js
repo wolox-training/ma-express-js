@@ -3,103 +3,82 @@ const app = require('../app');
 
 const request = supertest(app);
 
-/**
- * BACKLOG
- * I can create a new user with email, password, name and last name
- * I can't create a new user with an existent email
- * I can't create a new user with a password of less than 8 characters
- * I can't create a new user without email, password, name and last name
- * ------------------------------------------
- * If POST /users with complete data, receive an empty response with status 204
- * If POST /users with an existent email, receive a create_user_error
- * If POST /users with a short password, receive a create_user_error
- * If POST /users without email, password, name and last_name, receive a create_user_error
- */
-
 describe('If POST /users', () => {
-  it('with complete data, receive an empty response with status 204', done => {
-    request
+  it('with complete data, receive an empty response with status 204', async done => {
+    await request
       .post('/users')
       .send({
-        email: 'q@wolox.com.ar',
+        email: 'complete.data@wolox.com.ar',
         password: 'hola1234',
         name: 'Martin',
         last_name: 'Acosta'
       })
       .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
-        expect(res.body).toEqual({ email: 'q@wolox.com.ar' });
-        // expect(res.body).toBeNull();
-        return done();
-      });
+      .expect(204);
+    done();
   });
 
-  it('with an existent email, receive a create_user_error', done => {
-    request.post('/users').send({
-      email: 'q@wolox.com.ar',
-      password: 'hola1234',
-      name: 'Martin',
-      last_name: 'Acosta'
-    });
-    request
+  it('with an existent email, receive a create_user_error', async done => {
+    await request
       .post('/users')
       .send({
-        email: 'q@wolox.com.ar',
+        email: 'existent.email@wolox.com.ar',
         password: 'hola1234',
         name: 'Martin',
         last_name: 'Acosta'
       })
       .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(400)
-      .end((err, res) => {
-        if (err) return done(err);
-        expect(res.body).toEqual({ email: 'q@wolox.com.ar' });
-        // expect(res.body).toBeNull();
-        return done();
-      });
+      .expect(204);
+    await request
+      .post('/users')
+      .send({
+        email: 'existent.email@wolox.com.ar',
+        password: 'hola1234',
+        name: 'Martin',
+        last_name: 'Acosta'
+      })
+      .set('Accept', 'application/json')
+      .expect(400, { message: 'Email already in use.', internal_code: 'unique_email_error' });
+    done();
   });
 
-  it('with a short password, receive a create_user_error', done => {
-    request
+  it('with a short password, receive a create_user_error', async done => {
+    await request
       .post('/users')
       .send({
-        email: 'q@wolox.com.ar',
-        password: 'hola1234',
+        email: 'short.password@wolox.com.ar',
+        password: 'hola',
         name: 'Martin',
         last_name: 'Acosta'
       })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(400)
-      .end((err, res) => {
-        if (err) return done(err);
-        expect(res.body).toEqual({ email: 'q@wolox.com.ar' });
-        // expect(res.body).toBeNull();
-        return done();
-      });
+      .expect(400, { message: 'Invalid password.', internal_code: 'invalid_params_error' });
+    done();
   });
 
-  it('without email, password, name and last_name, receive a create_user_error', done => {
-    request
+  it('with non alphanumeric password, receive a create_user_error', async done => {
+    await request
       .post('/users')
       .send({
-        email: 'q@wolox.com.ar',
-        password: 'hola1234',
+        email: 'short.password@wolox.com.ar',
+        password: 'hola1234@',
         name: 'Martin',
         last_name: 'Acosta'
       })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(400)
-      .end((err, res) => {
-        if (err) return done(err);
-        expect(res.body).toEqual({ email: 'q@wolox.com.ar' });
-        // expect(res.body).toBeNull();
-        return done();
-      });
+      .expect(400, { message: 'Invalid password.', internal_code: 'invalid_params_error' });
+    done();
+  });
+
+  it('without email, password, name and last_name, receive a create_user_error', async done => {
+    await request
+      .post('/users')
+      .send({})
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(400, { message: 'Something went wrong with params.', internal_code: 'invalid_params_error' });
+    done();
   });
 });

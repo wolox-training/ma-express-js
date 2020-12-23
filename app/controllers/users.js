@@ -16,12 +16,12 @@ const hashPassword = async password => {
 const emailValidation = email => email.length > 13 && email.substring(email.length - 13) === '@wolox.com.ar';
 
 exports.signUp = async (req, res, next) => {
-  const { email: dirtEmail, password, name, last_name: lastName } = req.body;
-  const email = dirtEmail.trim();
   try {
-    const userValid = email && password && name && lastName;
+    const userValid = req.body.email && req.body.password && req.body.name && req.body.last_name;
     if (!userValid) throw errors.createUserError('Missing fields.');
 
+    const { email: dirtEmail, password, name, last_name: lastName } = req.body;
+    const email = dirtEmail.trim();
     const validEmail = emailValidation(email);
     if (!validEmail) throw errors.createUserError('Invalid email.');
 
