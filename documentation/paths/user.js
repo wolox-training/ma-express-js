@@ -1,33 +1,5 @@
 module.exports = {
   '/users': {
-    get: {
-      tags: ['CRUD operations'],
-      description: 'Get users',
-      operationId: 'getUsers',
-      parameters: [
-        {
-          name: 'page',
-          in: 'query',
-          schema: {
-            type: 'integer',
-            default: 1
-          },
-          required: false
-        }
-      ],
-      responses: {
-        200: {
-          description: 'Users were obtained',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/Users'
-              }
-            }
-          }
-        }
-      }
-    },
     post: {
       tags: ['CRUD operations'],
       description: 'Create user',
@@ -44,19 +16,19 @@ module.exports = {
         required: true
       },
       responses: {
-        200: {
+        204: {
           description: 'New user was created'
         },
         400: {
-          description: 'Invalid parameters',
+          description: 'Email in use for another user',
           content: {
             'application/json': {
               schema: {
                 $ref: '#/components/schemas/Error'
               },
               example: {
-                message: 'User´s email already exists',
-                internal_code: 'invalid_parameters'
+                message: 'Email already in use.',
+                internal_code: 'unique_email_error'
               }
             }
           }
