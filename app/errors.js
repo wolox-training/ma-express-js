@@ -8,3 +8,6 @@ exports.databaseError = message => internalError(message, exports.DATABASE_ERROR
 
 exports.DEFAULT_ERROR = 'default_error';
 exports.defaultError = message => internalError(message, exports.DEFAULT_ERROR);
+
+exports.CREATE_USER_ERROR = 'create_user_error';
+exports.createUserError = message => internalError(message, exports.CREATE_USER_ERROR);

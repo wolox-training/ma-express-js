@@ -1,66 +1,42 @@
 const bcrypt = require('bcryptjs');
+const errors = require('../errors');
+const userService = require('../services/users');
 
-const { User } = require('../models');
-const errors = require('../middlewares/errors');
-const logger = require('../logger');
-
-// Verifica la validez de la contraseña (alfanumérica > 7)
 const passwordLength = password => {
   const characters = /^[a-z0-9]+$/i;
-  const alfanumeric = characters.test(password);
-  const isValid = password.length > 7 && alfanumeric;
-  return isValid;
+  return password.length > 7 && characters.test(password);
 };
 
-// Hashea el password mediante bcrypt
 const hashPassword = async password => {
   const salt = await bcrypt.genSaltSync(10);
   const hashedPass = await bcrypt.hashSync(password, salt);
   return hashedPass;
 };
 
-// Verifica la validez y el dominio del email
-const emailValidation = email => {
-  const stringLength = email.length;
-  const testLength = stringLength > 13;
-  const testDomain = email.substring(stringLength - 13) === '@wolox.com.ar';
-  const isValid = testLength && testDomain;
-  return isValid;
-};
+const emailValidation = email => email.length > 13 && email.substring(email.length - 13) === '@wolox.com.ar';
 
-const mapRequest = body => {
-  const lastName = body.last_name;
-  return lastName;
-};
-
-exports.register = async (req, res, next) => {
-  const { email, password, name } = req.body;
-  const lastName = mapRequest(req.body);
+exports.signUp = async (req, res, next) => {
+  const { email: dirtEmail, password, name, last_name: lastName } = req.body;
+  const email = dirtEmail.trim();
   try {
-    // Verifico que el request contenga todos los campos
     const userValid = email && password && name && lastName;
-    if (!userValid) res.json({ error: 'Missing fields.' });
+    if (!userValid) throw errors.createUserError('Missing fields.');
 
-    // Verifico que el mail sea válido
     const validEmail = emailValidation(email);
-    if (!validEmail) res.json({ error: 'Invalid email.' });
+    if (!validEmail) throw errors.createUserError('Invalid email.');
 
-    // Verifico que el email no exista previamente
-    const emailExists = await User.findOne({ where: { email } });
-    if (emailExists) return res.send({ error: 'Email already exists.' });
-
-    // Verifico la longitud y composición de la contraseña
     const validPass = passwordLength(password);
-    if (!validPass) return res.json({ error: 'Invalid password.' });
+    if (!validPass) throw errors.createUserError('Invalid password.');
+
+    const emailExists = await userService.emailExists(email);
+    if (emailExists) throw errors.createUserError('Email already exists.');
+
     const hashedPassword = await hashPassword(password);
+    const newUser = await userService.create(email, hashedPassword, name, lastName);
+    if (!newUser) throw errors.databaseError('DB error.');
 
-    // Creo el nuevo usuario
-    const newUser = await User.create({ email, password: hashedPassword, name, lastName });
-    if (!newUser) return res.json({ error: 'DB error.' });
-
-    return res.json({ email });
+    return res.sendStatus(204);
   } catch (error) {
-    logger.error(error);
-    return next(errors.DEFAULT_ERROR);
+    return next(error);
   }
 };
