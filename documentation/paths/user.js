@@ -16,11 +16,11 @@ module.exports = {
         required: true
       },
       responses: {
-        204: {
+        201: {
           description: 'New user was created'
         },
         400: {
-          description: 'Email in use for another user',
+          description: 'There was an error with the request',
           content: {
             'application/json': {
               schema: {
@@ -29,6 +29,20 @@ module.exports = {
               example: {
                 message: 'Email already in use.',
                 internal_code: 'unique_email_error'
+              }
+            }
+          }
+        },
+        503: {
+          description: 'There was an error with the database',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error'
+              },
+              example: {
+                message: 'Error while trying to create an user',
+                internal_code: 'database_error'
               }
             }
           }
