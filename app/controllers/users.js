@@ -34,7 +34,7 @@ exports.signUp = async (req, res, next) => {
     const hashedPassword = await hashPassword(password);
     await userService.create(email, hashedPassword, name, lastName);
 
-    return res.sendStatus(204);
+    return res.sendStatus(201);
   } catch (error) {
     return next(error);
   }
