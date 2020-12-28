@@ -1,5 +1,3 @@
-// const logger = require('../logger');
-// const { checkSchema } = require('express-validator');
 const errors = require('../errors');
 const userService = require('../services/users');
 
@@ -15,8 +13,9 @@ exports.signUpValidation = async (req, res, next) => {
     const userValid = req.body.email && req.body.password && req.body.name && req.body.last_name;
     if (!userValid) throw errors.invalidParamsError('Something went wrong with params.');
 
-    req.email = req.email.trim();
-    req.lastName = req.last_name;
+    req.body.email = req.body.email.trim();
+    req.body.lastName = req.body.last_name;
+
     const { email, password } = req.body;
     const validEmail = emailValidation(email);
     if (!validEmail) throw errors.invalidParamsError('Invalid email.');
