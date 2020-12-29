@@ -19,4 +19,8 @@ services:
 
 before_script:
   - psql -c "CREATE DATABASE witter;" -U postgres
+<<<<<<< HEAD
   - npm run migrations-test
+=======
+  - npm run migrations
+>>>>>>> 0e66055d22331e4ab4c578089691bb27e0babe44
