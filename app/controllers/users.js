@@ -24,3 +24,19 @@ exports.signUp = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.signIn = async (req, res, next) => {
+  try {
+    console.log('EL REQUEST: ', req.body);
+    const { email, password } = req.body;
+
+    const emailExists = await userService.emailExists(email);
+    if (!emailExists) throw errors.unregisteredEmailError(errorsCatalog.UNREGISTERED_EMAIL_ERROR);
+
+    console.log('LOS DATOS RESCATADOS: ', emailExists.dataValues, password);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return next(error);
+  }
+};
