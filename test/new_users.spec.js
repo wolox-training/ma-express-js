@@ -1,6 +1,8 @@
 const supertest = require('supertest');
 const app = require('../app');
 const userService = require('../app/services/users');
+const errorsCatalog = require('../app/schemas/errors_catalog');
+const errors = require('../app/errors');
 
 const request = supertest(app);
 
@@ -22,20 +24,11 @@ describe('If POST /users with complete data ', () => {
     userFound = await userService.emailExists(user.email);
   });
 
-  it('receive status 201.', done => {
-    expect(response.statusCode).toBe(201);
-    done();
-  });
+  it('Receive status 201.', () => expect(response.statusCode).toBe(201));
 
-  it('receive an empty response.', done => {
-    expect(response.body).toEqual({});
-    done();
-  });
+  it('Receive an empty response.', () => expect(response.body).toEqual({}));
 
-  it('the user was saved in the DB.', done => {
-    expect(userFound).toBeTruthy();
-    done();
-  });
+  it('The user was saved in the DB.', () => expect(userFound).toBeTruthy());
 });
 
 describe('If POST /users with an existent email ', () => {
@@ -60,25 +53,17 @@ describe('If POST /users with an existent email ', () => {
       .set('Accept', 'application/json');
   });
 
-  it('the user already exists in the DB.', done => {
+  it('The user already exists in the DB.', () => {
     expect(userFound).toBeTruthy();
-    done();
   });
 
-  it('receive status 400', done => {
-    expect(response.status).toBe(400);
-    done();
-  });
+  it('Receive status 400', () => expect(response.status).toBe(400));
 
-  it('receive an unique_email_error code', done => {
-    expect(response.body.internal_code).toBe('unique_email_error');
-    done();
-  });
+  it(`Receive an ${errors.UNIQUE_EMAIL_ERROR} code`, () =>
+    expect(response.body.internal_code).toBe(errors.UNIQUE_EMAIL_ERROR));
 
-  it("receive an 'Email already in use.' message", done => {
-    expect(response.body.message).toBe('Email already in use.');
-    done();
-  });
+  it(`Receive an '${errorsCatalog.UNIQUE_EMAIL_ERROR}' message`, () =>
+    expect(response.body.message).toBe(errorsCatalog.UNIQUE_EMAIL_ERROR));
 });
 
 describe('If POST /users with a short password', () => {
@@ -99,25 +84,15 @@ describe('If POST /users with a short password', () => {
     userFound = await userService.emailExists(user.email);
   });
 
-  it('receive status 400', done => {
-    expect(response.status).toBe(400);
-    done();
-  });
+  it('Receive status 400', () => expect(response.status).toBe(400));
 
-  it('receive an invalid_params_error code', done => {
-    expect(response.body.internal_code).toBe('invalid_params_error');
-    done();
-  });
+  it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+    expect(response.body.internal_code).toBe(errors.INVALID_PARAMS_ERROR));
 
-  it("receive an 'Invalid password.' message", done => {
-    expect(response.body.message).toBe('Invalid password.');
-    done();
-  });
+  it(`Receive an '${errorsCatalog.PASSWORD_ERROR}' message`, () =>
+    expect(response.body.message[0]).toBe(errorsCatalog.PASSWORD_ERROR));
 
-  it('the user was not saved in the DB.', done => {
-    expect(userFound).toBeFalsy();
-    done();
-  });
+  it('The user was not saved in the DB.', () => expect(userFound).toBeFalsy());
 });
 
 describe('If POST /users with non alphanumeric password', () => {
@@ -138,50 +113,53 @@ describe('If POST /users with non alphanumeric password', () => {
     userFound = await userService.emailExists(user.email);
   });
 
-  it('receive status 400', done => {
-    expect(response.status).toBe(400);
-    done();
-  });
+  it('Receive status 400', () => expect(response.status).toBe(400));
 
-  it('receive an invalid_params_error code', done => {
-    expect(response.body.internal_code).toBe('invalid_params_error');
-    done();
-  });
+  it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+    expect(response.body.internal_code).toBe(errors.INVALID_PARAMS_ERROR));
 
-  it("receive an 'Invalid password.' message", done => {
-    expect(response.body.message).toBe('Invalid password.');
-    done();
-  });
+  it(`Receive an '${errorsCatalog.PASSWORD_ERROR}' message`, () =>
+    expect(response.body.message[0]).toBe(errorsCatalog.PASSWORD_ERROR));
 
-  it('the user was not saved in the DB.', done => {
-    expect(userFound).toBeFalsy();
-    done();
-  });
+  it('The user was not saved in the DB.', () => expect(userFound).toBeFalsy());
 });
 
 describe('If POST /users without email, password, name and last_name', () => {
-  let response = {};
-  const user = {};
+  const bodyParams = ['email', 'password', 'name', 'last_name'];
+  const errorMessageMap = {
+    email: [errorsCatalog.EMAIL_ERROR],
+    password: [errorsCatalog.PASSWORD_ERROR],
+    name: [errorsCatalog.NAME_ERROR],
+    last_name: [errorsCatalog.LAST_NAME_ERROR]
+  };
+  const user = {
+    email: 'incomplete.data@wolox.com.ar',
+    password: 'hola1234',
+    name: 'Martin',
+    last_name: 'Acosta'
+  };
 
-  beforeAll(async () => {
-    response = await request
-      .post('/users')
-      .send(user)
-      .set('Accept', 'application/json');
-  });
-
-  it('receive status 400', done => {
-    expect(response.status).toBe(400);
-    done();
-  });
-
-  it('receive an invalid_params_error code', done => {
-    expect(response.body.internal_code).toBe('invalid_params_error');
-    done();
-  });
-
-  it("receive an 'Something went wrong with params.' message", done => {
-    expect(response.body.message).toBe('Something went wrong with params.');
-    done();
+  bodyParams.forEach(param => {
+    describe(`When ${param} is not sent`, () => {
+      let response = {};
+      let userFound = {};
+      const createIncompleteUser = { ...user };
+      delete createIncompleteUser[param];
+      beforeAll(async () => {
+        response = await request
+          .post('/users')
+          .send(createIncompleteUser)
+          .set('Accept', 'application/json');
+        userFound = await userService.emailExists(user.email);
+      });
+      it('Checks error structure given by middleware', () =>
+        expect(Object.keys(response.body)).toEqual(['message', 'internal_code']));
+      it('Receive status 400', () => expect(response.status).toBe(400));
+      it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+        expect(response.body.internal_code).toEqual(errors.INVALID_PARAMS_ERROR));
+      it(`Receive an '${errorMessageMap[param]}' message`, () =>
+        expect(response.body.message).toEqual(errorMessageMap[param]));
+      it('The user was not saved in the DB.', () => expect(userFound).toBeFalsy());
+    });
   });
 });

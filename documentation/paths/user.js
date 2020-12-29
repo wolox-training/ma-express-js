@@ -1,7 +1,7 @@
 module.exports = {
   '/users': {
     post: {
-      tags: ['CRUD operations'],
+      tags: ['USERS'],
       description: 'Create user',
       operationId: 'createUser',
       parameters: [],

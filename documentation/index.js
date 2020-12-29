@@ -33,7 +33,7 @@ module.exports = {
   security: [],
   tags: [
     {
-      name: 'CRUD operations'
+      name: 'USERS'
     }
   ],
   paths,
