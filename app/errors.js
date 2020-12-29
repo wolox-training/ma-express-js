@@ -17,3 +17,6 @@ exports.uniqueEmailError = message => internalError(message, exports.UNIQUE_EMAI
 
 exports.UNREGISTERED_EMAIL_ERROR = 'unregistered_email_error';
 exports.unregisteredEmailError = message => internalError(message, exports.UNREGISTERED_EMAIL_ERROR);
+
+exports.CREDENTIALS_ERROR = 'credentials_error';
+exports.credentialsError = message => internalError(message, exports.CREDENTIALS_ERROR);

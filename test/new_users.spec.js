@@ -199,13 +199,13 @@ describe('If POST /users/sessions', () => {
     it('Checks error structure given by middleware', () =>
       expect(Object.keys(response.body)).toEqual(['message', 'internal_code']));
 
-    it('Receive status 400', () => expect(response.status).toBe(400));
+    it('Receive status 401', () => expect(response.status).toBe(401));
 
-    it(`Receive an ${errors.UNREGISTERED_EMAIL_ERROR} code`, () =>
-      expect(response.body.internal_code).toEqual(errors.UNREGISTERED_EMAIL_ERROR));
+    it(`Receive an ${errors.CREDENTIALS_ERROR} code`, () =>
+      expect(response.body.internal_code).toEqual(errors.CREDENTIALS_ERROR));
 
-    it(`Receive an '${errorsCatalog.UNREGISTERED_EMAIL_ERROR}' message`, () =>
-      expect(response.body.message).toBe(errorsCatalog.UNREGISTERED_EMAIL_ERROR));
+    it(`Receive an '${errorsCatalog.CREDENTIALS_ERROR}' message`, () =>
+      expect(response.body.message).toBe(errorsCatalog.CREDENTIALS_ERROR));
 
     it('The user is not stored in the DB.', () => expect(userFound).toBeFalsy());
   });
@@ -220,22 +220,44 @@ describe('If POST /users/sessions', () => {
       last_name: 'Acosta'
     };
 
-    const userLogin = {
-      email: 'user@wolox.com.ar',
-      password: 'hola1234'
-    };
+    describe('When password match', () => {
+      const userLogin = {
+        email: 'user@wolox.com.ar',
+        password: 'hola1234'
+      };
 
-    beforeAll(async () => {
-      await postUser('/users', userRegister);
-      userFound = await userService.emailExists(userRegister.email);
-      response = await postUser('/users/sessions', userLogin);
+      beforeAll(async () => {
+        await postUser('/users', userRegister);
+        userFound = await userService.emailExists(userRegister.email);
+        response = await postUser('/users/sessions', userLogin);
+      });
+
+      it('The user is stored in the DB.', () => expect(userFound).toBeTruthy());
+
+      it('Receive status 200.', () => expect(response.statusCode).toBe(200));
     });
 
-    it('The user is stored in the DB.', () => expect(userFound).toBeTruthy());
+    describe('When password not match', () => {
+      const userLogin = {
+        email: 'user@wolox.com.ar',
+        password: 'hola12345'
+      };
 
-    it('Receive status 200.', () => {
-      console.log('LA RESPUESTA RECIBIDA: ', response.body);
-      expect(response.statusCode).toBe(200);
+      beforeAll(async () => {
+        await postUser('/users', userRegister);
+        userFound = await userService.emailExists(userRegister.email);
+        response = await postUser('/users/sessions', userLogin);
+      });
+
+      it('The user is stored in the DB.', () => expect(userFound).toBeTruthy());
+
+      it('Receive status 401.', () => expect(response.statusCode).toBe(401));
+
+      it(`Receive an ${errors.CREDENTIALS_ERROR} code`, () =>
+        expect(response.body.internal_code).toEqual(errors.CREDENTIALS_ERROR));
+
+      it(`Receive an '${errorsCatalog.CREDENTIALS_ERROR}' message`, () =>
+        expect(response.body.message).toBe(errorsCatalog.CREDENTIALS_ERROR));
     });
   });
 });
