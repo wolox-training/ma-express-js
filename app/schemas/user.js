@@ -4,9 +4,8 @@ const errorsCatalog = require('./errors_catalog');
 exports.emailSchema = {
   email: {
     in: ['body'],
-    isEmail: {
-      bail: true
-    },
+    exists: true,
+    isEmail: true,
     custom: {
       options: value => value && value.length > 13 && value.substring(value.length - 13) === '@wolox.com.ar'
     },
@@ -18,6 +17,7 @@ exports.emailSchema = {
 exports.passwordSchema = {
   password: {
     in: ['body'],
+    exists: true,
     isLength: {
       options: { min: 8 }
     },
