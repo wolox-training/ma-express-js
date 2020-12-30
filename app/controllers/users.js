@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jwt-simple');
 const userService = require('../services/users');
+const { generateToken } = require('../services/sessions_manager');
 
 const hashPassword = async password => {
   const salt = await bcrypt.genSaltSync(10);
@@ -23,16 +23,11 @@ exports.signUp = async (req, res, next) => {
 
 exports.signIn = (req, res, next) => {
   try {
-    const { user } = res.locals;
+    const { user } = req;
 
-    const payload = {
-      id: user.id,
-      email: user.email
-    };
-    const secret = 'hola1234';
-    const token = jwt.encode(payload, secret);
+    const responseWithToken = generateToken(user);
 
-    return res.status(200).json({ token });
+    return res.status(200).json(responseWithToken);
   } catch (error) {
     return next(error);
   }
