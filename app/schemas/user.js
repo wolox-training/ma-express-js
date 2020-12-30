@@ -14,7 +14,8 @@ exports.emailSchema = {
   }
 };
 
-exports.passwordSchema = {
+exports.signUpSchema = {
+  ...exports.emailSchema,
   password: {
     in: ['body'],
     exists: true,
@@ -25,18 +26,12 @@ exports.passwordSchema = {
       options: value => value && isAlphanumeric(value)
     },
     errorMessage: errorsCatalog.PASSWORD_ERROR
-  }
-};
-
-exports.nameSchema = {
+  },
   name: {
     in: ['body'],
     exists: true,
     errorMessage: errorsCatalog.NAME_ERROR
-  }
-};
-
-exports.lastNameSchema = {
+  },
   last_name: {
     in: ['body'],
     exists: true,

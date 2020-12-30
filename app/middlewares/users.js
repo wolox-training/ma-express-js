@@ -13,18 +13,12 @@ exports.emailExists = async (req, res, next) => {
   }
 };
 
-exports.emailRegistered = async (req, res, next) => {
-  try {
-    const userFound = await userService.emailExists(req.body.email);
-    if (!userFound) throw errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR);
-
-    const passwordMatch = await bcrypt.compare(req.body.password, userFound.dataValues.password);
-    if (!passwordMatch) throw errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR);
-
-    res.locals.user = userFound.dataValues;
-
-    return next();
-  } catch (error) {
-    return next(error);
-  }
-};
+exports.checkCredentialsAndLoadUser = (req, res, next) =>
+  userService.emailExists(req.body.email).then(user => {
+    if (!user) return next(errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR));
+    return bcrypt.compare(req.body.password, user.dataValues.password).then(passwordMatch => {
+      if (!passwordMatch) return next(errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR));
+      req.user = user.dataValues;
+      return next();
+    });
+  });
