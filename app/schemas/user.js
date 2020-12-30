@@ -43,17 +43,3 @@ exports.lastNameSchema = {
     errorMessage: errorsCatalog.LAST_NAME_ERROR
   }
 };
-
-exports.emailSignInSchema = {
-  email: {
-    in: ['body'],
-    isEmail: {
-      bail: true
-    },
-    custom: {
-      options: value => value && value.length > 13 && value.substring(value.length - 13) === '@wolox.com.ar'
-    },
-    trim: true,
-    errorMessage: errorsCatalog.EMAIL_ERROR
-  }
-};
