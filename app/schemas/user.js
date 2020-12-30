@@ -1,7 +1,7 @@
 const { isAlphanumeric } = require('validator');
 const errorsCatalog = require('./errors_catalog');
 
-exports.createUserSchema = {
+exports.emailSchema = {
   email: {
     in: ['body'],
     exists: true,
@@ -11,7 +11,11 @@ exports.createUserSchema = {
     },
     trim: true,
     errorMessage: errorsCatalog.EMAIL_ERROR
-  },
+  }
+};
+
+exports.signUpSchema = {
+  ...exports.emailSchema,
   password: {
     in: ['body'],
     exists: true,

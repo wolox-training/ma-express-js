@@ -3,5 +3,6 @@ module.exports = {
   PASSWORD_ERROR: 'Invalid password.',
   NAME_ERROR: 'Name is required.',
   LAST_NAME_ERROR: 'Last name is required.',
-  UNIQUE_EMAIL_ERROR: 'Email already in use.'
+  UNIQUE_EMAIL_ERROR: 'Email already in use.',
+  CREDENTIALS_ERROR: 'The email or password are incorrect.'
 };

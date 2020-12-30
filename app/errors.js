@@ -14,3 +14,6 @@ exports.invalidParamsError = message => internalError(message, exports.INVALID_P
 
 exports.UNIQUE_EMAIL_ERROR = 'unique_email_error';
 exports.uniqueEmailError = message => internalError(message, exports.UNIQUE_EMAIL_ERROR);
+
+exports.CREDENTIALS_ERROR = 'credentials_error';
+exports.credentialsError = message => internalError(message, exports.CREDENTIALS_ERROR);
