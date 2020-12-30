@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 const supertest = require('supertest');
 const bcrypt = require('bcryptjs');
 const app = require('../app');
@@ -290,8 +291,13 @@ describe('/users/sessions [POST]', () => {
 });
 
 describe('/users [GET]', () => {
-  describe('response', async () => {
-    const response = await getUsers('/users');
-    console.log(response);
+  describe('response', () => {
+    let response = {};
+    beforeAll(async () => {
+      response = await getUsers('/users');
+    });
+    it('Tengo respuesta', () => {
+      expect(response.body).toEqual({ msg: 'hola' });
+    });
   });
 });
