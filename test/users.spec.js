@@ -291,13 +291,24 @@ describe('/users/sessions [POST]', () => {
 });
 
 describe('/users [GET]', () => {
-  describe('response', () => {
-    let response = {};
-    beforeAll(async () => {
-      response = await getUsers('/users');
-    });
-    it('Tengo respuesta', () => {
-      expect(response.body).toEqual({ msg: 'hola' });
+  describe('When there are at least 3 registered users', () => {
+    describe('When send offset = 1 and limit = 2 as query params', () => {
+      let response = {};
+      beforeAll(async () => {
+        await createUser();
+        await createUser();
+        await createUser();
+        response = await getUsers('/users?offset=1&limit=2');
+      });
+
+      it('Receive 2 users.', () => {
+        expect(response.body.length).toBe(2);
+      });
+
+      it('Receive ids 2 and 3', () => {
+        expect(response.body[0].id).toBe(2);
+        expect(response.body[1].id).toBe(3);
+      });
     });
   });
 });

@@ -13,3 +13,9 @@ exports.create = (email, password, name, lastName) =>
     logger.error('Error while trying to create an user', error.message);
     throw errors.databaseError(error.message);
   });
+
+exports.listUsers = (offset, limit) =>
+  User.findAll({ offset, limit }).catch(error => {
+    logger.error('Error while trying to get users', error.message);
+    throw errors.databaseError(error.message);
+  });
