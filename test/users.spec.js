@@ -16,6 +16,12 @@ const postUser = (endpoint, data) =>
     .send(data)
     .set('Accept', 'application/json');
 
+const getUsers = endpoint =>
+  request
+    .get(endpoint)
+    .send()
+    .set('Accept', 'application/json');
+
 const hashPassword = async password => {
   const salt = await bcrypt.genSaltSync(10);
   const hashedPass = await bcrypt.hashSync(password, salt);
@@ -280,5 +286,12 @@ describe('/users/sessions [POST]', () => {
         expect(Object.keys(payload)).toContain('id', 'iss', 'exp');
       });
     });
+  });
+});
+
+describe('/users [GET]', () => {
+  describe('response', async () => {
+    const response = await getUsers('/users');
+    console.log(response);
   });
 });

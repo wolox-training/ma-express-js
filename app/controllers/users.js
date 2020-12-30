@@ -32,3 +32,12 @@ exports.signIn = (req, res, next) => {
     return next(error);
   }
 };
+
+exports.listUsers = (req, res, next) => {
+  try {
+    console.log(req.body);
+    return res.status(200).json({ msg: 'hola' });
+  } catch (error) {
+    return next(error);
+  }
+};
