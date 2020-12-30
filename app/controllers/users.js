@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jwt-simple');
 const userService = require('../services/users');
 
 const hashPassword = async password => {
@@ -22,11 +23,16 @@ exports.signUp = async (req, res, next) => {
 
 exports.signIn = (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { user } = res.locals;
 
-    console.log('LOS DATOS RESCATADOS: ', email, password);
+    const payload = {
+      id: user.id,
+      email: user.email
+    };
+    const secret = 'hola1234';
+    const token = jwt.encode(payload, secret);
 
-    return res.sendStatus(200);
+    return res.status(200).json({ token });
   } catch (error) {
     return next(error);
   }

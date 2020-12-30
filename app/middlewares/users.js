@@ -15,11 +15,13 @@ exports.emailExists = async (req, res, next) => {
 
 exports.emailRegistered = async (req, res, next) => {
   try {
-    const emailExists = await userService.emailExists(req.body.email);
-    if (!emailExists) throw errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR);
+    const userFound = await userService.emailExists(req.body.email);
+    if (!userFound) throw errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR);
 
-    const passwordMatch = await bcrypt.compare(req.body.password, emailExists.dataValues.password);
+    const passwordMatch = await bcrypt.compare(req.body.password, userFound.dataValues.password);
     if (!passwordMatch) throw errors.credentialsError(errorsCatalog.CREDENTIALS_ERROR);
+
+    res.locals.user = userFound.dataValues;
 
     return next();
   } catch (error) {
