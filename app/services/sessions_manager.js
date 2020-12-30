@@ -1,11 +1,10 @@
 const jwt = require('jwt-simple');
 const moment = require('moment');
+const { secret, expirationDays } = require('../../config').common.session;
 
-exports.encode = payload => jwt.encode(payload, process.env.SECRET_KEY);
-
-exports.decode = token => jwt.decode(token, process.env.SECRET_KEY);
-
-const expirationDate = () => moment().add(process.env.EXPIRATION_DAYS, 'days');
+exports.encode = payload => jwt.encode(payload, secret);
+exports.decode = token => jwt.decode(token, secret);
+const expirationDate = () => moment().add(expirationDays, 'days');
 
 exports.generateToken = user => {
   const newExpirationDate = expirationDate();
