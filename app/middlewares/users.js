@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const userService = require('../services/users');
 const errors = require('../errors');
 const errorsCatalog = require('../schemas/errors_catalog');
+// const sessionsManager = require('../services/sessions_manager');
 
 exports.emailExists = async (req, res, next) => {
   try {
@@ -22,3 +23,9 @@ exports.checkCredentialsAndLoadUser = (req, res, next) =>
       return next();
     });
   });
+
+exports.checkAuthentication = (req, res) => {
+  console.log(req.headers);
+  
+  res.sendStatus(401);
+};

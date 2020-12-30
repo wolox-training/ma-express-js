@@ -291,7 +291,33 @@ describe('/users/sessions [POST]', () => {
 });
 
 describe('/users [GET]', () => {
-  describe('When there are at least 3 registered users', () => {
+  beforeAll(async () => {
+    const userLogin = {
+      email: 'user@wolox.com.ar',
+      password: 'hola1234'
+    };
+    userLogin.password = await hashPassword('hola1234');
+    await createUser(userLogin);
+    userLogin.password = 'hola1234';
+    await postUser('/users/sessions', userLogin);
+  });
+
+  describe('It should require authorization', () => {
+    let response = {};
+    beforeAll(async () => {
+      await createUser();
+      await createUser();
+      await createUser();
+      response = await getUsers('/users?offset=1&limit=2');
+      console.log(response.body.token);
+    });
+
+    it('Receive status code 401.', () => {
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
+  /* describe('When there are at least 3 registered users', () => {
     describe('When send offset = 1 and limit = 2 as query params', () => {
       let response = {};
       beforeAll(async () => {
@@ -310,5 +336,5 @@ describe('/users [GET]', () => {
         expect(response.body[1].id).toBe(3);
       });
     });
-  });
+  }); */
 });
