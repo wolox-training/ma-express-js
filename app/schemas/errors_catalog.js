@@ -4,5 +4,6 @@ module.exports = {
   NAME_ERROR: 'Name is required.',
   LAST_NAME_ERROR: 'Last name is required.',
   UNIQUE_EMAIL_ERROR: 'Email already in use.',
-  CREDENTIALS_ERROR: 'The email or password are incorrect.'
+  CREDENTIALS_ERROR: 'The email or password are incorrect.',
+  AUTHORIZATION_ERROR: 'Authorization required.'
 };

@@ -19,3 +19,12 @@ exports.generateToken = user => {
     exp: newExpirationDate
   };
 };
+
+exports.checkToken = authString => {
+  try {
+    const token = authString.replace(/^Bearer\s+/, '');
+    return exports.decode(token, secret);
+  } catch (error) {
+    return false;
+  }
+};

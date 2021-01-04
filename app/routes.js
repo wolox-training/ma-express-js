@@ -12,5 +12,5 @@ exports.init = app => {
     [paramsValidator.validateSchemaAndFail(emailSchema), checkCredentialsAndLoadUser],
     signIn
   );
-  app.get('/users', [checkAuthentication], listUsers);
+  app.get('/users', checkAuthentication, listUsers);
 };

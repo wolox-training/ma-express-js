@@ -17,3 +17,6 @@ exports.uniqueEmailError = message => internalError(message, exports.UNIQUE_EMAI
 
 exports.CREDENTIALS_ERROR = 'credentials_error';
 exports.credentialsError = message => internalError(message, exports.CREDENTIALS_ERROR);
+
+exports.AUTHORIZATION_ERROR = 'authorization_error';
+exports.authorizationError = message => internalError(message, exports.AUTHORIZATION_ERROR);

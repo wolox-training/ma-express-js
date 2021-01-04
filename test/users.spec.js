@@ -17,9 +17,10 @@ const postUser = (endpoint, data) =>
     .send(data)
     .set('Accept', 'application/json');
 
-const getUsers = endpoint =>
+const getUsers = (endpoint, token) =>
   request
     .get(endpoint)
+    .set('Authorization', `Bearer ${token}`)
     .send()
     .set('Accept', 'application/json');
 
@@ -291,6 +292,7 @@ describe('/users/sessions [POST]', () => {
 });
 
 describe('/users [GET]', () => {
+  let token = {};
   beforeAll(async () => {
     const userLogin = {
       email: 'user@wolox.com.ar',
@@ -299,7 +301,7 @@ describe('/users [GET]', () => {
     userLogin.password = await hashPassword('hola1234');
     await createUser(userLogin);
     userLogin.password = 'hola1234';
-    await postUser('/users/sessions', userLogin);
+    token = await (await postUser('/users/sessions', userLogin)).body.token;
   });
 
   describe('It should require authorization', () => {
@@ -308,8 +310,10 @@ describe('/users [GET]', () => {
       await createUser();
       await createUser();
       await createUser();
-      response = await getUsers('/users?offset=1&limit=2');
-      console.log(response.body.token);
+      response = await request
+        .get('/users?offset=1&limit=2')
+        .send()
+        .set('Accept', 'application/json');
     });
 
     it('Receive status code 401.', () => {
@@ -317,24 +321,43 @@ describe('/users [GET]', () => {
     });
   });
 
-  /* describe('When there are at least 3 registered users', () => {
-    describe('When send offset = 1 and limit = 2 as query params', () => {
+  describe('With authorization token', () => {
+    describe('When there are 3 registered users', () => {
       let response = {};
       beforeAll(async () => {
         await createUser();
         await createUser();
         await createUser();
-        response = await getUsers('/users?offset=1&limit=2');
       });
 
-      it('Receive 2 users.', () => {
-        expect(response.body.length).toBe(2);
+      describe('When send offset = 1 and limit = 2 as query params', () => {
+        beforeAll(async () => (response = await getUsers('/users?offset=1&limit=2', token)));
+
+        it('Receive status code 200.', () => {
+          expect(response.statusCode).toBe(200);
+        });
+
+        it('Receive 2 users.', () => {
+          expect(response.body.length).toBe(2);
+        });
+
+        it('Receive user ids 2 and 3', () => {
+          expect(response.body[0].id).toBe(2);
+          expect(response.body[1].id).toBe(3);
+        });
       });
 
-      it('Receive ids 2 and 3', () => {
-        expect(response.body[0].id).toBe(2);
-        expect(response.body[1].id).toBe(3);
+      describe('When send offset = 3 and limit = 2 as query params', () => {
+        beforeAll(async () => (response = await getUsers('/users?offset=3&limit=2', token)));
+
+        it('Receive status code 200.', () => {
+          expect(response.statusCode).toBe(200);
+        });
+
+        it('Receive 0 users.', () => {
+          expect(response.body.length).toBe(0);
+        });
       });
     });
-  }); */
+  });
 });
