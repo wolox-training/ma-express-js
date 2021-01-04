@@ -304,60 +304,114 @@ describe('/users [GET]', () => {
     token = await (await postUser('/users/sessions', userLogin)).body.token;
   });
 
-  describe('It should require authorization', () => {
+  describe('When Authorization header is missing', () => {
     let response = {};
     beforeAll(async () => {
       await createUser();
       await createUser();
       await createUser();
       response = await request
-        .get('/users?offset=1&limit=2')
+        .get('/users?page=1&limit=2')
         .send()
         .set('Accept', 'application/json');
     });
 
-    it('Receive status code 401.', () => {
-      expect(response.statusCode).toBe(401);
+    it('Receive status code 401.', () => expect(response.statusCode).toBe(401));
+  });
+
+  describe('When token is expired', () => {
+    const expiredToken =
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxODowNzozNC4zOThaIn0.--me13YPlNbn-acjhwlNfiMuicEyAopZPLLnP4BAl88';
+    let response = {};
+
+    describe('When send page = 1 and limit = 2 as query params', () => {
+      beforeAll(async () => (response = await getUsers('/users?page=1&limit=2', expiredToken)));
+
+      it('Receive status code 401.', () => expect(response.statusCode).toBe(401));
+
+      it(`Receive an ${errors.AUTHORIZATION_ERROR} code`, () =>
+        expect(response.body.internal_code).toEqual(errors.AUTHORIZATION_ERROR));
+
+      it(`Receive an '${errorsCatalog.AUTHORIZATION_ERROR}' message`, () =>
+        expect(response.body.message).toBe(errorsCatalog.AUTHORIZATION_ERROR));
     });
   });
 
-  describe('With authorization token', () => {
-    describe('When there are 3 registered users', () => {
-      let response = {};
+  describe('When token is valid', () => {
+    let response = {};
+    beforeAll(async () => {
+      await createUser();
+      await createUser();
+      await createUser();
+    });
+
+    describe('Successful with pagination params', () => {
+      beforeAll(async () => (response = await getUsers('/users?page=1&limit=2', token)));
+
+      it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
+
+      it('Response contains page, offset and limit params', () => {
+        expect(Object.keys(response.body)).toContain('page', 'offset', 'limit');
+      });
+
+      it('Receive 2 users.', () => expect(response.body.page.length).toBe(2));
+
+      it('Receive user ids 1 and 2', () => {
+        expect(response.body.page[0].id).toBe(1);
+        expect(response.body.page[1].id).toBe(2);
+      });
+    });
+
+    describe('Successful without pagination params', () => {
       beforeAll(async () => {
         await createUser();
         await createUser();
         await createUser();
+        response = await getUsers('/users', token);
       });
 
-      describe('When send offset = 1 and limit = 2 as query params', () => {
-        beforeAll(async () => (response = await getUsers('/users?offset=1&limit=2', token)));
+      it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-        it('Receive status code 200.', () => {
-          expect(response.statusCode).toBe(200);
-        });
-
-        it('Receive 2 users.', () => {
-          expect(response.body.length).toBe(2);
-        });
-
-        it('Receive user ids 2 and 3', () => {
-          expect(response.body[0].id).toBe(2);
-          expect(response.body[1].id).toBe(3);
-        });
+      it('Response contains page, offset and limit params', () => {
+        expect(Object.keys(response.body)).toContain('page', 'offset', 'limit');
       });
 
-      describe('When send offset = 3 and limit = 2 as query params', () => {
-        beforeAll(async () => (response = await getUsers('/users?offset=3&limit=2', token)));
+      it('Receive 3 users.', () => expect(response.body.page.length).toBe(3));
 
-        it('Receive status code 200.', () => {
-          expect(response.statusCode).toBe(200);
-        });
-
-        it('Receive 0 users.', () => {
-          expect(response.body.length).toBe(0);
-        });
+      it('Receive user ids 1, 2 and 3', () => {
+        expect(response.body.page[0].id).toBe(1);
+        expect(response.body.page[1].id).toBe(2);
+        expect(response.body.page[2].id).toBe(3);
       });
+
+      it('Receive offset = 0 and limit = 10', () => {
+        expect(response.body.offset).toBe(0);
+        expect(response.body.limit).toBe(10);
+      });
+    });
+
+    describe('Empty response with out of range params', () => {
+      beforeAll(async () => (response = await getUsers('/users?page=3&limit=2', token)));
+
+      it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
+
+      it('Response contains page, offset and limit params', () => {
+        expect(Object.keys(response.body)).toContain('page', 'offset', 'limit');
+      });
+
+      it('Receive 0 users.', () => expect(response.body.page.length).toBe(0));
+    });
+
+    describe('Fail with non integer params', () => {
+      beforeAll(async () => (response = await getUsers('/users?page=a&limit=2', token)));
+
+      it('Receive status code 400.', () => expect(response.statusCode).toBe(400));
+
+      it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+        expect(response.body.internal_code).toEqual(errors.INVALID_PARAMS_ERROR));
+
+      it(`Receive an '${errorsCatalog.PAGINATION_ERROR}' message`, () =>
+        expect(response.body.message[0]).toBe(errorsCatalog.PAGINATION_ERROR));
     });
   });
 });

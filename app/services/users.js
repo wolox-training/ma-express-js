@@ -14,8 +14,11 @@ exports.create = (email, password, name, lastName) =>
     throw errors.databaseError(error.message);
   });
 
-exports.listUsers = (offset, limit) =>
-  User.findAll({ offset, limit }).catch(error => {
+exports.listUsers = async (page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const rawListUsers = await User.findAll({ offset, limit }).catch(error => {
     logger.error('Error while trying to get users', error.message);
     throw errors.databaseError(error.message);
   });
+  return { rawListUsers, offset, limit };
+};

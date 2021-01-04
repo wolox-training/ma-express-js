@@ -38,3 +38,18 @@ exports.signUpSchema = {
     errorMessage: errorsCatalog.LAST_NAME_ERROR
   }
 };
+
+exports.paginationSchema = {
+  page: {
+    in: ['query'],
+    isInt: true,
+    optional: { options: { nullable: true } },
+    errorMessage: errorsCatalog.PAGINATION_ERROR
+  },
+  limit: {
+    in: ['query'],
+    isInt: true,
+    optional: { options: { nullable: true } },
+    errorMessage: errorsCatalog.PAGINATION_ERROR
+  }
+};

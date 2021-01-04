@@ -5,5 +5,6 @@ module.exports = {
   LAST_NAME_ERROR: 'Last name is required.',
   UNIQUE_EMAIL_ERROR: 'Email already in use.',
   CREDENTIALS_ERROR: 'The email or password are incorrect.',
-  AUTHORIZATION_ERROR: 'Authorization required.'
+  AUTHORIZATION_ERROR: 'Authorization required.',
+  PAGINATION_ERROR: 'Page and limit params must be integers.'
 };
