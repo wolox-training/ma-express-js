@@ -20,5 +20,5 @@ exports.listUsers = async (page = 1, limit = 10) => {
     logger.error('Error while trying to get users', error.message);
     throw errors.databaseError(error.message);
   });
-  return { rawListUsers, offset, limit };
+  return { rawListUsers, page, limit };
 };

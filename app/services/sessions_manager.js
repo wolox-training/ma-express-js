@@ -22,8 +22,9 @@ exports.generateToken = user => {
 
 exports.checkToken = authString => {
   try {
-    const token = authString.replace(/^Bearer\s+/, '');
-    return exports.decode(token, secret);
+    const payload = exports.decode(authString.replace(/^Bearer\s+/, ''), secret);
+    if (!moment().isBefore(payload.exp)) return false;
+    return payload;
   } catch (error) {
     return false;
   }

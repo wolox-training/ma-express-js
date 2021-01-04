@@ -36,9 +36,8 @@ exports.signIn = (req, res, next) => {
 
 exports.listUsers = async (req, res, next) => {
   try {
-    const { rawListUsers, offset, limit } = await userService.listUsers(req.query.page, req.query.limit);
-    const listUsers = serializeUsers(rawListUsers, offset, limit);
-
+    const { rawListUsers, page, limit } = await userService.listUsers(req.query.page, req.query.limit);
+    const listUsers = serializeUsers(rawListUsers, page, limit);
     return res.status(200).json(listUsers);
   } catch (error) {
     return next(error);

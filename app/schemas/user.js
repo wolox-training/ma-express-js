@@ -42,13 +42,19 @@ exports.signUpSchema = {
 exports.paginationSchema = {
   page: {
     in: ['query'],
-    isInt: true,
+    isInt: {
+      options: { min: 1 }
+    },
+    toInt: true,
     optional: { options: { nullable: true } },
     errorMessage: errorsCatalog.PAGINATION_ERROR
   },
   limit: {
     in: ['query'],
-    isInt: true,
+    isInt: {
+      options: { min: 1 }
+    },
+    toInt: true,
     optional: { options: { nullable: true } },
     errorMessage: errorsCatalog.PAGINATION_ERROR
   }

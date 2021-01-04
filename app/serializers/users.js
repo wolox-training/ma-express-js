@@ -1,4 +1,4 @@
-exports.serializeUsers = (rawListUsers, offset, limit) => {
+exports.serializeUsers = (rawListUsers, current_page, limit) => {
   let response = {};
   if (rawListUsers) {
     const listUsers = rawListUsers.map(user => ({
@@ -9,7 +9,7 @@ exports.serializeUsers = (rawListUsers, offset, limit) => {
     }));
     response = {
       page: listUsers,
-      offset,
+      current_page,
       limit
     };
   }

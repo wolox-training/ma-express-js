@@ -321,7 +321,7 @@ describe('/users [GET]', () => {
 
   describe('When token is expired', () => {
     const expiredToken =
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxODowNzozNC4zOThaIn0.--me13YPlNbn-acjhwlNfiMuicEyAopZPLLnP4BAl88';
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxOToyODowMi45MjZaIn0.6ggVjEzgW7tjPLd_89qcDNVPD4NdqpCf0LCGsjEZBYU';
     let response = {};
 
     describe('When send page = 1 and limit = 2 as query params', () => {
@@ -329,11 +329,11 @@ describe('/users [GET]', () => {
 
       it('Receive status code 401.', () => expect(response.statusCode).toBe(401));
 
-      it(`Receive an ${errors.AUTHORIZATION_ERROR} code`, () =>
-        expect(response.body.internal_code).toEqual(errors.AUTHORIZATION_ERROR));
+      it(`Receive an ${errors.TOKEN_EXPIRATION_ERROR} code`, () =>
+        expect(response.body.internal_code).toEqual(errors.TOKEN_EXPIRATION_ERROR));
 
-      it(`Receive an '${errorsCatalog.AUTHORIZATION_ERROR}' message`, () =>
-        expect(response.body.message).toBe(errorsCatalog.AUTHORIZATION_ERROR));
+      it(`Receive an '${errorsCatalog.TOKEN_EXPIRATION_ERROR}' message`, () =>
+        expect(response.body.message).toBe(errorsCatalog.TOKEN_EXPIRATION_ERROR));
     });
   });
 
@@ -350,8 +350,8 @@ describe('/users [GET]', () => {
 
       it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-      it('Response contains page, offset and limit params', () => {
-        expect(Object.keys(response.body)).toContain('page', 'offset', 'limit');
+      it('Response contains page, current_page and limit params', () => {
+        expect(Object.keys(response.body)).toContain('page', 'current_page', 'limit');
       });
 
       it('Receive 2 users.', () => expect(response.body.page.length).toBe(2));
@@ -359,6 +359,11 @@ describe('/users [GET]', () => {
       it('Receive user ids 1 and 2', () => {
         expect(response.body.page[0].id).toBe(1);
         expect(response.body.page[1].id).toBe(2);
+      });
+
+      it('Receive current_page = 1 and limit = 2', () => {
+        expect(response.body.current_page).toBe(1);
+        expect(response.body.limit).toBe(2);
       });
     });
 
@@ -372,8 +377,8 @@ describe('/users [GET]', () => {
 
       it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-      it('Response contains page, offset and limit params', () => {
-        expect(Object.keys(response.body)).toContain('page', 'offset', 'limit');
+      it('Response contains page, current_page and limit params', () => {
+        expect(Object.keys(response.body)).toContain('page', 'current_page', 'limit');
       });
 
       it('Receive 3 users.', () => expect(response.body.page.length).toBe(3));
@@ -384,8 +389,8 @@ describe('/users [GET]', () => {
         expect(response.body.page[2].id).toBe(3);
       });
 
-      it('Receive offset = 0 and limit = 10', () => {
-        expect(response.body.offset).toBe(0);
+      it('Receive current_page = 1 and limit = 10', () => {
+        expect(response.body.current_page).toBe(1);
         expect(response.body.limit).toBe(10);
       });
     });
@@ -395,8 +400,8 @@ describe('/users [GET]', () => {
 
       it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-      it('Response contains page, offset and limit params', () => {
-        expect(Object.keys(response.body)).toContain('page', 'offset', 'limit');
+      it('Response contains page, current_page and limit params', () => {
+        expect(Object.keys(response.body)).toContain('page', 'current_page', 'limit');
       });
 
       it('Receive 0 users.', () => expect(response.body.page.length).toBe(0));
