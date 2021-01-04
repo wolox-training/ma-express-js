@@ -8,8 +8,8 @@ exports.emailExists = email =>
     throw errors.databaseError(error.message);
   });
 
-exports.create = (email, password, name, lastName) =>
-  User.create({ email, password, name, lastName }).catch(error => {
+exports.createUser = user =>
+  User.create(user).catch(error => {
     logger.error('Error while trying to create an user', error.message);
     throw errors.databaseError(error.message);
   });
@@ -19,3 +19,8 @@ exports.listUsers = (offset, limit) =>
     logger.error('Error while trying to get users', error.message);
     throw errors.databaseError(error.message);
   });
+
+exports.upgradeUser = user => {
+  user.isAdmin = true;
+  user.save();
+};

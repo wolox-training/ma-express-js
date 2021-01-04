@@ -26,6 +26,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      is_admin: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false
@@ -63,6 +67,10 @@ module.exports = {
       password: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      is_admin: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
       created_at: {
         type: Sequelize.DATE,

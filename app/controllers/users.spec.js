@@ -1,13 +1,13 @@
 /* eslint-disable max-lines */
 const supertest = require('supertest');
 const bcrypt = require('bcryptjs');
-const app = require('../app');
-const userService = require('../app/services/users');
-const sessionsManager = require('../app/services/sessions_manager');
-const errorsCatalog = require('../app/schemas/errors_catalog');
-const errors = require('../app/errors');
+const app = require('../../app');
+const userService = require('../services/users');
+const sessionsManager = require('../services/sessions_manager');
+const errorsCatalog = require('../schemas/errors_catalog');
+const errors = require('../errors');
 
-const { create: createUser } = require('./factory/users');
+const { create: createUser } = require('../../test/factory/users');
 
 const request = supertest(app);
 
@@ -293,6 +293,7 @@ describe('/users/sessions [POST]', () => {
 
 describe('/users [GET]', () => {
   let token = {};
+
   beforeAll(async () => {
     const userLogin = {
       email: 'user@wolox.com.ar',
@@ -357,6 +358,151 @@ describe('/users [GET]', () => {
         it('Receive 0 users.', () => {
           expect(response.body.length).toBe(0);
         });
+      });
+    });
+  });
+});
+
+describe('/admin/users [POST]', () => {
+  describe('with complete data ', () => {
+    let response = {};
+    let userFound = {};
+    const user = {
+      email: 'complete.data@wolox.com.ar',
+      password: 'hola1234',
+      name: 'Martin',
+      last_name: 'Acosta'
+    };
+
+    beforeAll(async () => {
+      response = await postUser('/users', user);
+      userFound = await userService.emailExists(user.email);
+    });
+
+    it('Receive status 201.', () => expect(response.statusCode).toBe(201));
+
+    it('Receive an empty response.', () => expect(response.body).toEqual({}));
+
+    it('The user was saved in the DB.', () => expect(userFound).toBeTruthy());
+  });
+
+  describe('with an existent email ', () => {
+    let response = {};
+    let userFound = {};
+    const user = {
+      email: 'existent.email@wolox.com.ar',
+      password: 'hola1234',
+      name: 'Martin',
+      last_name: 'Acosta'
+    };
+
+    beforeAll(async () => {
+      await createUser(user);
+      userFound = await userService.emailExists(user.email);
+      response = await postUser('/users', user);
+    });
+
+    it('The user already exists in the DB.', () => expect(userFound).toBeTruthy());
+
+    it('Receive status 400', () => expect(response.status).toBe(400));
+
+    it(`Receive an ${errors.UNIQUE_EMAIL_ERROR} code`, () =>
+      expect(response.body.internal_code).toBe(errors.UNIQUE_EMAIL_ERROR));
+
+    it(`Receive an '${errorsCatalog.UNIQUE_EMAIL_ERROR}' message`, () =>
+      expect(response.body.message).toBe(errorsCatalog.UNIQUE_EMAIL_ERROR));
+  });
+
+  describe('with a short password', () => {
+    let response = {};
+    let userFound = {};
+    const user = {
+      email: 'short.password@wolox.com.ar',
+      password: 'hola',
+      name: 'Martin',
+      last_name: 'Acosta'
+    };
+
+    beforeAll(async () => {
+      response = await postUser('/users', user);
+      userFound = await userService.emailExists(user.email);
+    });
+
+    it('Receive status 400', () => expect(response.status).toBe(400));
+
+    it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+      expect(response.body.internal_code).toBe(errors.INVALID_PARAMS_ERROR));
+
+    it(`Receive an '${errorsCatalog.PASSWORD_ERROR}' message`, () =>
+      expect(response.body.message[0]).toBe(errorsCatalog.PASSWORD_ERROR));
+
+    it('The user was not saved in the DB.', () => expect(userFound).toBeFalsy());
+  });
+
+  describe('with non alphanumeric password', () => {
+    let response = {};
+    let userFound = {};
+    const user = {
+      email: 'short.password@wolox.com.ar',
+      password: 'hola1234@',
+      name: 'Martin',
+      last_name: 'Acosta'
+    };
+
+    beforeAll(async () => {
+      response = await postUser('/users', user);
+      userFound = await userService.emailExists(user.email);
+    });
+
+    it('Receive status 400', () => expect(response.status).toBe(400));
+
+    it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+      expect(response.body.internal_code).toBe(errors.INVALID_PARAMS_ERROR));
+
+    it(`Receive an '${errorsCatalog.PASSWORD_ERROR}' message`, () =>
+      expect(response.body.message[0]).toBe(errorsCatalog.PASSWORD_ERROR));
+
+    it('The user was not saved in the DB.', () => expect(userFound).toBeFalsy());
+  });
+
+  describe('without email, password, name and last_name', () => {
+    const bodyParams = ['email', 'password', 'name', 'last_name'];
+    const errorMessageMap = {
+      email: [errorsCatalog.EMAIL_ERROR],
+      password: [errorsCatalog.PASSWORD_ERROR],
+      name: [errorsCatalog.NAME_ERROR],
+      last_name: [errorsCatalog.LAST_NAME_ERROR]
+    };
+    const user = {
+      email: 'incomplete.data@wolox.com.ar',
+      password: 'hola1234',
+      name: 'Martin',
+      last_name: 'Acosta'
+    };
+
+    bodyParams.forEach(param => {
+      describe(`When ${param} is not sent`, () => {
+        let response = {};
+        let userFound = {};
+        const createIncompleteUser = { ...user };
+        delete createIncompleteUser[param];
+        beforeAll(async () => {
+          response = await postUser('/users', createIncompleteUser);
+          userFound = await userService.emailExists(user.email);
+        });
+
+        it('Checks error structure given by middleware', () =>
+          expect(Object.keys(response.body)).toEqual(['message', 'internal_code']));
+
+        it('Receive status 400', () => expect(response.status).toBe(400));
+
+        it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+          expect(response.body.internal_code).toEqual(errors.INVALID_PARAMS_ERROR));
+
+        it(`Receive an '${errorMessageMap[param]}' message`, () =>
+          expect(response.body.message).toEqual(errorMessageMap[param]));
+
+        it('The user was not saved in the DB.', () => expect(userFound).toBeFalsy());
       });
     });
   });

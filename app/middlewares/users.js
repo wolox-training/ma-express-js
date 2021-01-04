@@ -4,15 +4,12 @@ const errors = require('../errors');
 const errorsCatalog = require('../schemas/errors_catalog');
 const sessionsManager = require('../services/sessions_manager');
 
-exports.emailExists = async (req, res, next) => {
-  try {
-    const emailExists = await userService.emailExists(req.body.email);
-    if (emailExists) throw errors.uniqueEmailError(errorsCatalog.UNIQUE_EMAIL_ERROR);
+exports.emailExists = isAdmin => (req, res, next) =>
+  userService.emailExists(req.body.email).then(user => {
+    if (user && !isAdmin) return next(errors.uniqueEmailError(errorsCatalog.UNIQUE_EMAIL_ERROR));
+    if (user) req.user = user;
     return next();
-  } catch (error) {
-    return next(error);
-  }
-};
+  });
 
 exports.checkCredentialsAndLoadUser = (req, res, next) =>
   userService.emailExists(req.body.email).then(user => {

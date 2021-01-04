@@ -6,11 +6,20 @@ const { signUpSchema, emailSchema } = require('./schemas/user');
 
 exports.init = app => {
   app.get('/health', healthCheck);
-  app.post('/users', [paramsValidator.validateSchemaAndFail(signUpSchema), emailExists], signUp);
+  app.post(
+    '/users',
+    [paramsValidator.validateSchemaAndFail(signUpSchema), emailExists(false)],
+    signUp(false)
+  );
   app.post(
     '/users/sessions',
     [paramsValidator.validateSchemaAndFail(emailSchema), checkCredentialsAndLoadUser],
     signIn
   );
   app.get('/users', checkAuthentication, listUsers);
+  app.post(
+    '/admin/users',
+    [paramsValidator.validateSchemaAndFail(signUpSchema), emailExists(true)],
+    signUp(true)
+  );
 };
