@@ -17,3 +17,9 @@ exports.uniqueEmailError = message => internalError(message, exports.UNIQUE_EMAI
 
 exports.CREDENTIALS_ERROR = 'credentials_error';
 exports.credentialsError = message => internalError(message, exports.CREDENTIALS_ERROR);
+
+exports.AUTHORIZATION_ERROR = 'authorization_error';
+exports.authorizationError = message => internalError(message, exports.AUTHORIZATION_ERROR);
+
+exports.TOKEN_EXPIRATION_ERROR = 'token_expiration_error';
+exports.tokenExpirationError = message => internalError(message, exports.TOKEN_EXPIRATION_ERROR);

@@ -1,12 +1,12 @@
 const supertest = require('supertest');
 const bcrypt = require('bcryptjs');
-const app = require('../app');
-const userService = require('../app/services/users');
-const sessionsManager = require('../app/services/sessions_manager');
-const errorsCatalog = require('../app/schemas/errors_catalog');
-const errors = require('../app/errors');
+const app = require('../../app');
+const userService = require('../../app/services/users');
+const sessionsManager = require('../../app/services/sessions_manager');
+const errorsCatalog = require('../../app/schemas/errors_catalog');
+const errors = require('../../app/errors');
 
-const { create: createUser } = require('./factory/users');
+const { create: createUser } = require('../factory/users');
 
 const request = supertest(app);
 

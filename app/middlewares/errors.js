@@ -7,7 +7,9 @@ const statusCodes = {
   [errors.DEFAULT_ERROR]: 500,
   [errors.INVALID_PARAMS_ERROR]: 400,
   [errors.UNIQUE_EMAIL_ERROR]: 400,
-  [errors.CREDENTIALS_ERROR]: 401
+  [errors.CREDENTIALS_ERROR]: 401,
+  [errors.AUTHORIZATION_ERROR]: 401,
+  [errors.TOKEN_EXPIRATION_ERROR]: 401
 };
 
 exports.handle = (error, req, res, next) => {

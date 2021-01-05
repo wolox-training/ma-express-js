@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const userService = require('../services/users');
 const errors = require('../errors');
 const errorsCatalog = require('../schemas/errors_catalog');
+const sessionsManager = require('../services/sessions_manager');
 
 exports.emailExists = async (req, res, next) => {
   try {
@@ -22,3 +23,11 @@ exports.checkCredentialsAndLoadUser = (req, res, next) =>
       return next();
     });
   });
+
+exports.checkAuthentication = (req, res, next) => {
+  const { authorization } = req.headers;
+  if (!authorization) return next(errors.authorizationError(errorsCatalog.AUTHORIZATION_ERROR));
+  const payload = sessionsManager.checkToken(authorization);
+  if (!payload) return next(errors.tokenExpirationError(errorsCatalog.TOKEN_EXPIRATION_ERROR));
+  return next();
+};
