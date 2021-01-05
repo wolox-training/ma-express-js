@@ -26,5 +26,12 @@ exports.checkAuthentication = (req, res, next) => {
   if (!authorization) return next(errors.authorizationError(errorsCatalog.AUTHORIZATION_ERROR));
   const payload = sessionsManager.checkToken(authorization);
   if (!payload) return next(errors.tokenExpirationError(errorsCatalog.TOKEN_EXPIRATION_ERROR));
+  req.userId = payload.id;
   return next();
 };
+
+exports.checkAdmin = (req, res, next) =>
+  userService.userIdIsAdmin(req.userId).then(user => {
+    if (!user.dataValues.isAdmin) return next(errors.authLevelError(errorsCatalog.AUTH_LEVEL_ERROR));
+    return next();
+  });

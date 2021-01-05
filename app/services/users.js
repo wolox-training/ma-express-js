@@ -23,7 +23,13 @@ exports.listUsers = async (page = 1, limit = 10) => {
   return { rawListUsers, page, limit };
 };
 
-exports.upgradeUser = user => {
+exports.upgradeUser = async user => {
   user.isAdmin = true;
-  user.save();
+  await user.save();
 };
+
+exports.userIdIsAdmin = id =>
+  User.findByPk(id).catch(error => {
+    logger.error('Error while trying to get user by email', error.message);
+    throw errors.databaseError(error.message);
+  });
