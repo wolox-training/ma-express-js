@@ -7,7 +7,8 @@ exports.config = {
     },
 
     session: {
-      secret: 'some-super-secret'
+      secret: process.env.SECRET_KEY,
+      expirationDays: process.env.EXPIRATION_DAYS
     }
   }
 };
