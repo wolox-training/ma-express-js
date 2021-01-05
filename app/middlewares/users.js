@@ -23,7 +23,8 @@ exports.checkCredentialsAndLoadUser = (req, res, next) =>
 
 exports.checkAuthentication = (req, res, next) => {
   const { authorization } = req.headers;
-  const authorized = sessionsManager.checkToken(authorization);
-  if (!authorized) return next(errors.authorizationError(errorsCatalog.AUTHORIZATION_ERROR));
+  if (!authorization) return next(errors.authorizationError(errorsCatalog.AUTHORIZATION_ERROR));
+  const payload = sessionsManager.checkToken(authorization);
+  if (!payload) return next(errors.tokenExpirationError(errorsCatalog.TOKEN_EXPIRATION_ERROR));
   return next();
 };

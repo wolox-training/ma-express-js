@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const userService = require('../services/users');
 const { generateToken } = require('../services/sessions_manager');
+const { serializeUsers } = require('../serializers/users');
 
 const hashPassword = async password => {
   const salt = await bcrypt.genSaltSync(10);
@@ -31,9 +32,7 @@ exports.signUp = isAdmin => async (req, res, next) => {
 exports.signIn = (req, res, next) => {
   try {
     const { user } = req;
-
     const responseWithToken = generateToken(user);
-
     return res.status(200).json(responseWithToken);
   } catch (error) {
     return next(error);
@@ -42,16 +41,8 @@ exports.signIn = (req, res, next) => {
 
 exports.listUsers = async (req, res, next) => {
   try {
-    const { offset, limit } = req.query;
-
-    const listUsers = await userService.listUsers(offset, limit).map(user => ({
-      id: user.dataValues.id,
-      name: user.dataValues.name,
-      lastName: user.dataValues.lastName,
-      email: user.dataValues.email
-    }));
-
-    return res.status(200).json(listUsers);
+    const { rawListUsers, page, limit } = await userService.listUsers(req.query.page, req.query.limit);
+    return res.status(200).json(serializeUsers(rawListUsers, page, limit));
   } catch (error) {
     return next(error);
   }
