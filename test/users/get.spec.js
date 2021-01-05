@@ -1,20 +1,14 @@
 const supertest = require('supertest');
 const bcrypt = require('bcryptjs');
 const app = require('../../app');
-// const userService = require('../app/services/users');
-// const sessionsManager = require('../app/services/sessions_manager');
+const userService = require('../../app/services/users');
+const sessionsManager = require('../../app/services/sessions_manager');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
 
 const { create: createUser } = require('../factory/users');
 
 const request = supertest(app);
-
-const postUser = (endpoint, data) =>
-  request
-    .post(endpoint)
-    .send(data)
-    .set('Accept', 'application/json');
 
 const getUsers = (endpoint, token) =>
   request
@@ -30,7 +24,7 @@ const hashPassword = async password => {
 };
 
 describe.only('/users [GET]', () => {
-  let token = {};
+  let rawToken = {};
   beforeEach(async () => {
     const username = `user${Math.floor(Math.random() * 100)}`;
     const userLogin = {
@@ -39,8 +33,8 @@ describe.only('/users [GET]', () => {
     };
     userLogin.password = await hashPassword('hola1234');
     await createUser(userLogin);
-    userLogin.password = 'hola1234';
-    token = await (await postUser('/users/sessions', userLogin)).body.token;
+    const userFound = await userService.emailExists(userLogin.email);
+    rawToken = sessionsManager.generateToken(userFound.dataValues);
   });
 
   describe('When Authorization header is missing', () => {
@@ -85,7 +79,7 @@ describe.only('/users [GET]', () => {
     });
 
     describe('Successful with pagination params', () => {
-      beforeAll(async () => (response = await getUsers('/users?page=1&limit=2', token)));
+      beforeAll(async () => (response = await getUsers('/users?page=1&limit=2', rawToken.token)));
 
       it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
@@ -110,7 +104,7 @@ describe.only('/users [GET]', () => {
       beforeAll(async () => {
         await createUser();
         await createUser();
-        response = await getUsers('/users', token);
+        response = await getUsers('/users', rawToken.token);
       });
 
       it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
@@ -134,7 +128,7 @@ describe.only('/users [GET]', () => {
     });
 
     describe('Empty response with out of range params', () => {
-      beforeAll(async () => (response = await getUsers('/users?page=3&limit=2', token)));
+      beforeAll(async () => (response = await getUsers('/users?page=3&limit=2', rawToken.token)));
 
       it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
@@ -146,7 +140,7 @@ describe.only('/users [GET]', () => {
     });
 
     describe('Fail with non integer params', () => {
-      beforeAll(async () => (response = await getUsers('/users?page=a&limit=2', token)));
+      beforeAll(async () => (response = await getUsers('/users?page=a&limit=2', rawToken.token)));
 
       it('Receive status code 400.', () => expect(response.statusCode).toBe(400));
 
