@@ -12,10 +12,8 @@ const hashPassword = async password => {
 exports.signUp = async (req, res, next) => {
   try {
     const { email, password, name, last_name: lastName } = req.body;
-
     const hashedPassword = await hashPassword(password);
     await userService.create(email, hashedPassword, name, lastName);
-
     return res.sendStatus(201);
   } catch (error) {
     return next(error);
@@ -25,9 +23,7 @@ exports.signUp = async (req, res, next) => {
 exports.signIn = (req, res, next) => {
   try {
     const { user } = req;
-
     const responseWithToken = generateToken(user);
-
     return res.status(200).json(responseWithToken);
   } catch (error) {
     return next(error);
@@ -37,8 +33,7 @@ exports.signIn = (req, res, next) => {
 exports.listUsers = async (req, res, next) => {
   try {
     const { rawListUsers, page, limit } = await userService.listUsers(req.query.page, req.query.limit);
-    const listUsers = serializeUsers(rawListUsers, page, limit);
-    return res.status(200).json(listUsers);
+    return res.status(200).json(serializeUsers(rawListUsers, page, limit));
   } catch (error) {
     return next(error);
   }

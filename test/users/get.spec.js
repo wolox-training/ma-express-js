@@ -23,9 +23,13 @@ const hashPassword = async password => {
   return hashedPass;
 };
 
-describe.only('/users [GET]', () => {
-  let rawToken = {};
-  beforeEach(async () => {
+let rawToken = {};
+let response = {};
+const expiredToken =
+  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxOToyODowMi45MjZaIn0.6ggVjEzgW7tjPLd_89qcDNVPD4NdqpCf0LCGsjEZBYU';
+
+describe('/users [GET]', () => {
+  beforeAll(async () => {
     const username = `user${Math.floor(Math.random() * 100)}`;
     const userLogin = {
       email: `${username}@wolox.com.ar`,
@@ -38,7 +42,6 @@ describe.only('/users [GET]', () => {
   });
 
   describe('When Authorization header is missing', () => {
-    let response = {};
     beforeAll(async () => {
       await createUser();
       await createUser();
@@ -49,29 +52,24 @@ describe.only('/users [GET]', () => {
         .set('Accept', 'application/json');
     });
 
-    it('Receive status code 401.', () => expect(response.statusCode).toBe(401));
+    test('Receive status code 401.', () => expect(response.statusCode).toBe(401));
   });
 
   describe('When token is expired', () => {
-    const expiredToken =
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxOToyODowMi45MjZaIn0.6ggVjEzgW7tjPLd_89qcDNVPD4NdqpCf0LCGsjEZBYU';
-    let response = {};
-
     describe('When send page = 1 and limit = 2 as query params', () => {
       beforeAll(async () => (response = await getUsers('/users?page=1&limit=2', expiredToken)));
 
-      it('Receive status code 401.', () => expect(response.statusCode).toBe(401));
+      test('Receive status code 401.', () => expect(response.statusCode).toBe(401));
 
-      it(`Receive an ${errors.TOKEN_EXPIRATION_ERROR} code`, () =>
+      test(`Receive an ${errors.TOKEN_EXPIRATION_ERROR} code`, () =>
         expect(response.body.internal_code).toEqual(errors.TOKEN_EXPIRATION_ERROR));
 
-      it(`Receive an '${errorsCatalog.TOKEN_EXPIRATION_ERROR}' message`, () =>
+      test(`Receive an '${errorsCatalog.TOKEN_EXPIRATION_ERROR}' message`, () =>
         expect(response.body.message).toBe(errorsCatalog.TOKEN_EXPIRATION_ERROR));
     });
   });
 
   describe('When token is valid', () => {
-    let response = {};
     beforeAll(async () => {
       await createUser();
       await createUser();
@@ -81,20 +79,20 @@ describe.only('/users [GET]', () => {
     describe('Successful with pagination params', () => {
       beforeAll(async () => (response = await getUsers('/users?page=1&limit=2', rawToken.token)));
 
-      it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
+      test('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-      it('Response contains page, current_page and limit params', () => {
+      test('Response contains page, current_page and limit params', () => {
         expect(Object.keys(response.body)).toContain('page', 'current_page', 'limit');
       });
 
-      it('Receive 2 users.', () => expect(response.body.page.length).toBe(2));
+      test('Receive 2 users.', () => expect(response.body.page.length).toBe(2));
 
-      it('Receive user ids 1 and 2', () => {
+      test('Receive user ids 1 and 2', () => {
         expect(response.body.page[0].id).toBe(1);
         expect(response.body.page[1].id).toBe(2);
       });
 
-      it('Receive current_page = 1 and limit = 2', () => {
+      test('Receive current_page = 1 and limit = 2', () => {
         expect(response.body.current_page).toBe(1);
         expect(response.body.limit).toBe(2);
       });
@@ -104,24 +102,25 @@ describe.only('/users [GET]', () => {
       beforeAll(async () => {
         await createUser();
         await createUser();
+        await createUser();
         response = await getUsers('/users', rawToken.token);
       });
 
-      it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
+      test('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-      it('Response contains page, current_page and limit params', () => {
+      test('Response contains page, current_page and limit params', () => {
         expect(Object.keys(response.body)).toContain('page', 'current_page', 'limit');
       });
 
-      it('Receive 3 users.', () => expect(response.body.page.length).toBe(3));
+      test('Receive 3 users.', () => expect(response.body.page.length).toBe(3));
 
-      it('Receive user ids 1, 2 and 3', () => {
+      test('Receive user ids 1, 2 and 3', () => {
         expect(response.body.page[0].id).toBe(1);
         expect(response.body.page[1].id).toBe(2);
         expect(response.body.page[2].id).toBe(3);
       });
 
-      it('Receive current_page = 1 and limit = 10', () => {
+      test('Receive current_page = 1 and limit = 10', () => {
         expect(response.body.current_page).toBe(1);
         expect(response.body.limit).toBe(10);
       });
@@ -130,24 +129,24 @@ describe.only('/users [GET]', () => {
     describe('Empty response with out of range params', () => {
       beforeAll(async () => (response = await getUsers('/users?page=3&limit=2', rawToken.token)));
 
-      it('Receive status code 200.', () => expect(response.statusCode).toBe(200));
+      test('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
-      it('Response contains page, current_page and limit params', () => {
+      test('Response contains page, current_page and limit params', () => {
         expect(Object.keys(response.body)).toContain('page', 'current_page', 'limit');
       });
 
-      it('Receive 0 users.', () => expect(response.body.page.length).toBe(0));
+      test('Receive 0 users.', () => expect(response.body.page.length).toBe(0));
     });
 
     describe('Fail with non integer params', () => {
       beforeAll(async () => (response = await getUsers('/users?page=a&limit=2', rawToken.token)));
 
-      it('Receive status code 400.', () => expect(response.statusCode).toBe(400));
+      test('Receive status code 400.', () => expect(response.statusCode).toBe(400));
 
-      it(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
+      test(`Receive an ${errors.INVALID_PARAMS_ERROR} code`, () =>
         expect(response.body.internal_code).toEqual(errors.INVALID_PARAMS_ERROR));
 
-      it(`Receive an '${errorsCatalog.PAGINATION_ERROR}' message`, () =>
+      test(`Receive an '${errorsCatalog.PAGINATION_ERROR}' message`, () =>
         expect(response.body.message[0]).toBe(errorsCatalog.PAGINATION_ERROR));
     });
   });
