@@ -9,7 +9,8 @@ const statusCodes = {
   [errors.UNIQUE_EMAIL_ERROR]: 400,
   [errors.CREDENTIALS_ERROR]: 401,
   [errors.AUTHORIZATION_ERROR]: 401,
-  [errors.TOKEN_EXPIRATION_ERROR]: 401
+  [errors.TOKEN_EXPIRATION_ERROR]: 401,
+  [errors.FORBIDDEN_ERROR]: 403
 };
 
 exports.handle = (error, req, res, next) => {

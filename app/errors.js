@@ -23,3 +23,6 @@ exports.authorizationError = message => internalError(message, exports.AUTHORIZA
 
 exports.TOKEN_EXPIRATION_ERROR = 'token_expiration_error';
 exports.tokenExpirationError = message => internalError(message, exports.TOKEN_EXPIRATION_ERROR);
+
+exports.FORBIDDEN_ERROR = 'forbidden_error';
+exports.forbiddenError = message => internalError(message, exports.FORBIDDEN_ERROR);

@@ -35,7 +35,7 @@ describe('/users [POST]', () => {
 
     beforeAll(async () => {
       response = await postUser('/users', user);
-      userFound = await userService.emailExists(user.email);
+      userFound = await userService.findByEmail(user.email);
     });
 
     it('Receive status 201.', () => expect(response.statusCode).toBe(201));
@@ -57,7 +57,7 @@ describe('/users [POST]', () => {
 
     beforeAll(async () => {
       await createUser(user);
-      userFound = await userService.emailExists(user.email);
+      userFound = await userService.findByEmail(user.email);
       response = await postUser('/users', user);
     });
 
@@ -84,7 +84,7 @@ describe('/users [POST]', () => {
 
     beforeAll(async () => {
       response = await postUser('/users', user);
-      userFound = await userService.emailExists(user.email);
+      userFound = await userService.findByEmail(user.email);
     });
 
     it('Receive status 400', () => expect(response.status).toBe(400));
@@ -110,7 +110,7 @@ describe('/users [POST]', () => {
 
     beforeAll(async () => {
       response = await postUser('/users', user);
-      userFound = await userService.emailExists(user.email);
+      userFound = await userService.findByEmail(user.email);
     });
 
     it('Receive status 400', () => expect(response.status).toBe(400));
@@ -147,7 +147,7 @@ describe('/users [POST]', () => {
         delete createIncompleteUser[param];
         beforeAll(async () => {
           response = await postUser('/users', createIncompleteUser);
-          userFound = await userService.emailExists(user.email);
+          userFound = await userService.findByEmail(user.email);
         });
 
         it('Checks error structure given by middleware', () =>
@@ -178,7 +178,7 @@ describe('/users/sessions [POST]', () => {
 
     beforeAll(async () => {
       response = await postUser('/users/sessions', userInvalid);
-      userFound = await userService.emailExists(userInvalid.email);
+      userFound = await userService.findByEmail(userInvalid.email);
     });
 
     it('Checks error structure given by middleware', () =>
@@ -205,7 +205,7 @@ describe('/users/sessions [POST]', () => {
 
     beforeAll(async () => {
       response = await postUser('/users/sessions', user);
-      userFound = await userService.emailExists(user.email);
+      userFound = await userService.findByEmail(user.email);
     });
 
     it('Checks error structure given by middleware', () =>
@@ -240,7 +240,7 @@ describe('/users/sessions [POST]', () => {
         userRegister.password = await hashPassword('hola1234');
         await createUser(userRegister);
         response = await postUser('/users/sessions', userLogin);
-        userFound = await userService.emailExists(userRegister.email);
+        userFound = await userService.findByEmail(userRegister.email);
       });
 
       it('The user is stored in the DB.', () => expect(userFound).toBeTruthy());
@@ -263,7 +263,7 @@ describe('/users/sessions [POST]', () => {
 
       beforeAll(async () => {
         await createUser(userRegister);
-        userFound = await userService.emailExists(userRegister.email);
+        userFound = await userService.findByEmail(userRegister.email);
         response = await postUser('/users/sessions', userLogin);
       });
 

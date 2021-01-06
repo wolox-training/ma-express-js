@@ -9,11 +9,20 @@ const hashPassword = async password => {
   return hashedPass;
 };
 
-exports.signUp = async (req, res, next) => {
+exports.signUp = isAdmin => async (req, res, next) => {
   try {
     const { email, password, name, last_name: lastName } = req.body;
     const hashedPassword = await hashPassword(password);
-    await userService.create(email, hashedPassword, name, lastName);
+    const user = {
+      email,
+      password: hashedPassword,
+      name,
+      lastName,
+      isAdmin
+    };
+    if (req.user) await userService.upgradeUser(req.user);
+    else await userService.createUser(user);
+
     return res.sendStatus(201);
   } catch (error) {
     return next(error);
