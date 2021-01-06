@@ -6,13 +6,7 @@ const dbConfig = require('../../config/db')[config.environment];
 
 const basename = path.basename(__filename);
 const db = {};
-const sequelize = new Sequelize(
-  dbConfig.database,
-  dbConfig.username,
-  dbConfig.password,
-  dbConfig,
-  dbConfig.dialectOptions.ssl
-);
+const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig);
 
 fs.readdirSync(__dirname)
   .filter(file => file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js')
