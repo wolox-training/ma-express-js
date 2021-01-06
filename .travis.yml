@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - "10.14.1"
+  - "12.18.2"
 
 sudo: true
 
@@ -18,5 +18,5 @@ services:
   - postgresql
 
 before_script:
-  - psql -c "CREATE DATABASE bookstest;" -U postgres
-  - npm run migrations-test
+  - psql -c "CREATE DATABASE witter;" -U postgres
+  - npm run migrations

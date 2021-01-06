@@ -1,11 +1,7 @@
 const bcrypt = require('bcryptjs');
-const errors = require('../errors');
 const userService = require('../services/users');
-
-const passwordTest = password => {
-  const characters = /^[a-z0-9]+$/i;
-  return password.length > 7 && characters.test(password);
-};
+const { generateToken } = require('../services/sessions_manager');
+const { serializeUsers } = require('../serializers/users');
 
 const hashPassword = async password => {
   const salt = await bcrypt.genSaltSync(10);
@@ -13,28 +9,40 @@ const hashPassword = async password => {
   return hashedPass;
 };
 
-const emailValidation = email => email.length > 13 && email.substring(email.length - 13) === '@wolox.com.ar';
-
-exports.signUp = async (req, res, next) => {
+exports.signUp = isAdmin => async (req, res, next) => {
   try {
-    const userValid = req.body.email && req.body.password && req.body.name && req.body.last_name;
-    if (!userValid) throw errors.invalidParamsError('Something went wrong with params.');
-
-    const { email: dirtEmail, password, name, last_name: lastName } = req.body;
-    const email = dirtEmail.trim();
-    const validEmail = emailValidation(email);
-    if (!validEmail) throw errors.invalidParamsError('Invalid email.');
-
-    const validPass = passwordTest(password);
-    if (!validPass) throw errors.invalidParamsError('Invalid password.');
-
-    const emailExists = await userService.emailExists(email);
-    if (emailExists) throw errors.uniqueEmailError('Email already in use.');
-
+    const { email, password, name, last_name: lastName } = req.body;
     const hashedPassword = await hashPassword(password);
-    await userService.create(email, hashedPassword, name, lastName);
+    const user = {
+      email,
+      password: hashedPassword,
+      name,
+      lastName,
+      isAdmin
+    };
+    if (req.user) await userService.upgradeUser(req.user);
+    else await userService.createUser(user);
 
     return res.sendStatus(201);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.signIn = (req, res, next) => {
+  try {
+    const { user } = req;
+    const responseWithToken = generateToken(user);
+    return res.status(200).json(responseWithToken);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.listUsers = async (req, res, next) => {
+  try {
+    const { rawListUsers, page, limit } = await userService.listUsers(req.query.page, req.query.limit);
+    return res.status(200).json(serializeUsers(rawListUsers, page, limit));
   } catch (error) {
     return next(error);
   }

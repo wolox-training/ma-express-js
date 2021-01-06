@@ -14,3 +14,15 @@ exports.invalidParamsError = message => internalError(message, exports.INVALID_P
 
 exports.UNIQUE_EMAIL_ERROR = 'unique_email_error';
 exports.uniqueEmailError = message => internalError(message, exports.UNIQUE_EMAIL_ERROR);
+
+exports.CREDENTIALS_ERROR = 'credentials_error';
+exports.credentialsError = message => internalError(message, exports.CREDENTIALS_ERROR);
+
+exports.AUTHORIZATION_ERROR = 'authorization_error';
+exports.authorizationError = message => internalError(message, exports.AUTHORIZATION_ERROR);
+
+exports.TOKEN_EXPIRATION_ERROR = 'token_expiration_error';
+exports.tokenExpirationError = message => internalError(message, exports.TOKEN_EXPIRATION_ERROR);
+
+exports.FORBIDDEN_ERROR = 'forbidden_error';
+exports.forbiddenError = message => internalError(message, exports.FORBIDDEN_ERROR);
