@@ -8,7 +8,10 @@ module.exports = {
     host: config.host,
     port: config.port,
     dialect: 'postgres',
-    logging: true
+    logging: true,
+    dialectOptions: {
+      ssl: true
+    }
   },
   testing: {
     username: config.username,
@@ -17,7 +20,10 @@ module.exports = {
     host: config.host,
     port: config.port,
     dialect: 'postgres',
-    logging: false
+    logging: false,
+    dialectOptions: {
+      ssl: true
+    }
   },
   production: {
     username: config.username,
@@ -27,6 +33,9 @@ module.exports = {
     port: config.port,
     dialect: 'postgres',
     logging: false,
-    sslmode: require
+    sslmode: require,
+    dialectOptions: {
+      ssl: true
+    }
   }
 };
