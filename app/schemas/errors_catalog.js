@@ -8,5 +8,5 @@ module.exports = {
   AUTHORIZATION_ERROR: 'Authorization required.',
   PAGINATION_ERROR: 'Page and limit params must be integers.',
   TOKEN_EXPIRATION_ERROR: 'Expired Token',
-  AUTH_LEVEL_ERROR: 'Insufficient authorization level.'
+  FORBIDDEN_ERROR: 'Insufficient authorization level.'
 };

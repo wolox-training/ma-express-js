@@ -28,7 +28,7 @@ exports.init = app => {
   );
   app.post(
     '/admin/users',
-    [checkAuthentication, checkAdmin, paramsValidator.validateSchemaAndFail(signUpSchema), emailExists(true)],
+    [paramsValidator.validateSchemaAndFail(signUpSchema), checkAuthentication, checkAdmin, emailExists(true)],
     signUp(true)
   );
 };

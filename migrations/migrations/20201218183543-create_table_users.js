@@ -69,7 +69,7 @@ module.exports = {
         allowNull: false
       },
       is_admin: {
-        type: Sequelize.STRING,
+        type: Sequelize.BOOLEAN,
         allowNull: true
       },
       created_at: {

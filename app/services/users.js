@@ -2,7 +2,7 @@ const { User } = require('../models');
 const logger = require('../logger');
 const errors = require('../errors');
 
-exports.emailExists = email =>
+exports.findByEmail = email =>
   User.findOne({ where: { email } }).catch(error => {
     logger.error('Error while trying to get user by email', error.message);
     throw errors.databaseError(error.message);
@@ -28,8 +28,8 @@ exports.upgradeUser = async user => {
   await user.save();
 };
 
-exports.userIdIsAdmin = id =>
+exports.findById = id =>
   User.findByPk(id).catch(error => {
-    logger.error('Error while trying to get user by email', error.message);
+    logger.error('Error while trying to get user by ID', error.message);
     throw errors.databaseError(error.message);
   });

@@ -34,16 +34,14 @@ describe('/admin/users [POST]', () => {
     last_name: 'Acosta'
   };
   beforeEach(async () => {
-    let userFound = {};
     const username = 'admin';
     const userLogin = {
       email: `${username}@wolox.com.ar`,
       isAdmin: true
     };
     userLogin.password = await hashPassword('hola1234');
-    await createUser(userLogin);
-    userFound = await userService.emailExists(userLogin.email);
-    rawAdmin = sessionsManager.generateToken(userFound.dataValues);
+    const createdUser = await createUser(userLogin);
+    rawAdmin = sessionsManager.generateToken(createdUser.dataValues);
   });
 
   describe('When Authorization header is missing', () => {
@@ -66,26 +64,24 @@ describe('/admin/users [POST]', () => {
 
   describe('When user is not admin', () => {
     let response = {};
-    let userFound = {};
     let rawRegular = {};
     beforeAll(async () => {
       const regularUser = {
         email: 'regular@wolox.com.ar',
         isAdmin: false
       };
-      await createUser(regularUser);
-      userFound = await userService.emailExists(regularUser.email);
-      rawRegular = sessionsManager.generateToken(userFound.dataValues);
+      const createdRegularUser = await createUser(regularUser);
+      rawRegular = sessionsManager.generateToken(createdRegularUser.dataValues);
       response = await postUser(adminEndpoint, newUser, rawRegular.token);
     });
 
     test('Receive status code 403.', () => expect(response.statusCode).toBe(403));
 
-    it(`Receive an ${errors.AUTH_LEVEL_ERROR} code`, () =>
-      expect(response.body.internal_code).toBe(errors.AUTH_LEVEL_ERROR));
+    it(`Receive an ${errors.FORBIDDEN_ERROR} code`, () =>
+      expect(response.body.internal_code).toBe(errors.FORBIDDEN_ERROR));
 
-    it(`Receive an '${errorsCatalog.AUTH_LEVEL_ERROR}' message`, () =>
-      expect(response.body.message).toBe(errorsCatalog.AUTH_LEVEL_ERROR));
+    it(`Receive an '${errorsCatalog.FORBIDDEN_ERROR}' message`, () =>
+      expect(response.body.message).toBe(errorsCatalog.FORBIDDEN_ERROR));
   });
 
   describe('When user is admin', () => {
@@ -94,9 +90,9 @@ describe('/admin/users [POST]', () => {
       let userFound = {};
       let response = {};
       beforeAll(async () => {
-        userExists = await userService.emailExists(newUser.email);
+        userExists = await userService.findByEmail(newUser.email);
         response = await postUser(adminEndpoint, newUser, rawAdmin.token);
-        userFound = await userService.emailExists(newUser.email);
+        userFound = await userService.findByEmail(newUser.email);
       });
 
       it('User does not previously exist in DB.', () => expect(userExists).toBeFalsy());
@@ -110,7 +106,7 @@ describe('/admin/users [POST]', () => {
       it('User was saved in the DB.', () => expect(userFound).toBeTruthy());
     });
 
-    describe('When email previously exists', () => {
+    describe('When user exists and its not an admin', () => {
       let userExists = {};
       let userFound = {};
       let response = {};
@@ -119,14 +115,13 @@ describe('/admin/users [POST]', () => {
           email: 'existent.email@wolox.com.ar',
           password: 'hola1234',
           name: 'Martin',
-          lastName: 'Acosta',
           last_name: 'Acosta',
           isAdmin: false
         };
         await createUser(user);
-        userExists = await userService.emailExists(user.email);
+        userExists = await userService.findByEmail(user.email);
         response = await postUser(adminEndpoint, user, rawAdmin.token);
-        userFound = await userService.emailExists(user.email);
+        userFound = await userService.findByEmail(user.email);
       });
 
       it('The user already exists in the DB.', () => expect(userExists).toBeTruthy());
@@ -153,7 +148,7 @@ describe('/admin/users [POST]', () => {
       };
       beforeAll(async () => {
         response = await postUser(adminEndpoint, user, rawAdmin.token);
-        userFound = await userService.emailExists(user.email);
+        userFound = await userService.findByEmail(user.email);
       });
 
       it('Receive status 400', () => expect(response.status).toBe(400));
@@ -178,7 +173,7 @@ describe('/admin/users [POST]', () => {
       };
       beforeAll(async () => {
         response = await postUser(adminEndpoint, user, rawAdmin.token);
-        userFound = await userService.emailExists(user.email);
+        userFound = await userService.findByEmail(user.email);
       });
 
       it('Receive status 400', () => expect(response.status).toBe(400));
@@ -208,7 +203,7 @@ describe('/admin/users [POST]', () => {
           delete createIncompleteUser[param];
           beforeAll(async () => {
             response = await postUser(adminEndpoint, createIncompleteUser, rawAdmin.token);
-            userFound = await userService.emailExists(newUser.email);
+            userFound = await userService.findByEmail(newUser.email);
           });
 
           it('Checks error structure given by middleware', () =>

@@ -37,7 +37,7 @@ describe('/users [GET]', () => {
     };
     userLogin.password = await hashPassword('hola1234');
     await createUser(userLogin);
-    const userFound = await userService.emailExists(userLogin.email);
+    const userFound = await userService.findByEmail(userLogin.email);
     rawToken = sessionsManager.generateToken(userFound.dataValues);
   });
 
