@@ -9,5 +9,6 @@ module.exports = {
   PAGINATION_ERROR: 'Page and limit params must be integers.',
   TOKEN_EXPIRATION_ERROR: 'Expired Token',
   FORBIDDEN_ERROR: 'Insufficient authorization level.',
-  EXTERNAL_API_ERROR: 'Error while trying to get random weet content.'
+  EXTERNAL_API_ERROR: 'Error while trying to get random weet content.',
+  USER_NOT_EXIST_ERROR: 'The user does not exists.'
 };

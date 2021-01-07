@@ -6,10 +6,10 @@ exports.createWeet = async (req, res, next) => {
     const randomWeet = await randomContentService.randomContent();
     const weet = {
       content: randomWeet.joke,
-      userId: req.userId
+      creatorId: req.userId
     };
-    weetService.createWeet(weet);
-    return res.json({ weet: randomWeet.joke });
+    await weetService.createWeet(weet);
+    return res.json({ status: 201, describe: 'Weet created.' });
   } catch (error) {
     return next(error);
   }
