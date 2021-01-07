@@ -1,7 +1,15 @@
-exports.createWeet = (req, res, next) => {
+const weetService = require('../services/weets');
+const randomContentService = require('../services/random_content');
+
+exports.createWeet = async (req, res, next) => {
   try {
-    const request = req.body;
-    return res.json({ msg: request });
+    const randomWeet = await randomContentService.randomContent();
+    const weet = {
+      content: randomWeet.joke,
+      userId: req.userId
+    };
+    weetService.createWeet(weet);
+    return res.json({ weet: randomWeet.joke });
   } catch (error) {
     return next(error);
   }
