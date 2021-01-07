@@ -1,5 +1,6 @@
 const weetService = require('../services/weets');
 const randomContentService = require('../services/random_content');
+const { serializeWeets } = require('../serializers/weets');
 
 exports.createWeet = async (req, res, next) => {
   try {
@@ -10,6 +11,15 @@ exports.createWeet = async (req, res, next) => {
     };
     await weetService.createWeet(weet);
     return res.json({ status: 201, describe: 'Weet created.' });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.listWeets = async (req, res, next) => {
+  try {
+    const { rawListWeets, page, limit } = await weetService.listWeets(req.query.page, req.query.limit);
+    return res.status(200).json(serializeWeets(rawListWeets, page, limit));
   } catch (error) {
     return next(error);
   }
