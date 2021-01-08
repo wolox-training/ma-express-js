@@ -4,6 +4,8 @@ const app = require('../../app');
 const sessionsManager = require('../../app/services/sessions_manager');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
+let { rawToken, response } = require('../vars');
+const { expiredToken } = require('../vars');
 
 const { create: createUser } = require('../factory/users');
 const { create: createWeet } = require('../factory/weets');
@@ -22,11 +24,6 @@ const hashPassword = async password => {
   const hashedPass = await bcrypt.hashSync(password, salt);
   return hashedPass;
 };
-
-let rawToken = {};
-let response = {};
-const expiredToken =
-  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxOToyODowMi45MjZaIn0.6ggVjEzgW7tjPLd_89qcDNVPD4NdqpCf0LCGsjEZBYU';
 
 describe('/weets [GET]', () => {
   beforeEach(async () => {

@@ -5,6 +5,7 @@ const userService = require('../../app/services/users');
 const sessionsManager = require('../../app/services/sessions_manager');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
+let { response, userFound } = require('../vars');
 
 const { create: createUser } = require('../factory/users');
 
@@ -24,8 +25,6 @@ const hashPassword = async password => {
 
 describe('/users [POST]', () => {
   describe('with complete data ', () => {
-    let response = {};
-    let userFound = {};
     const user = {
       email: 'complete.data@wolox.com.ar',
       password: 'hola1234',
@@ -46,8 +45,6 @@ describe('/users [POST]', () => {
   });
 
   describe('with an existent email ', () => {
-    let response = {};
-    let userFound = {};
     const user = {
       email: 'existent.email@wolox.com.ar',
       password: 'hola1234',
@@ -73,8 +70,6 @@ describe('/users [POST]', () => {
   });
 
   describe('with a short password', () => {
-    let response = {};
-    let userFound = {};
     const user = {
       email: 'short.password@wolox.com.ar',
       password: 'hola',
@@ -99,8 +94,6 @@ describe('/users [POST]', () => {
   });
 
   describe('with non alphanumeric password', () => {
-    let response = {};
-    let userFound = {};
     const user = {
       email: 'short.password@wolox.com.ar',
       password: 'hola1234@',
@@ -141,8 +134,6 @@ describe('/users [POST]', () => {
 
     bodyParams.forEach(param => {
       describe(`When ${param} is not sent`, () => {
-        let response = {};
-        let userFound = {};
         const createIncompleteUser = { ...user };
         delete createIncompleteUser[param];
         beforeAll(async () => {
@@ -169,8 +160,6 @@ describe('/users [POST]', () => {
 
 describe('/users/sessions [POST]', () => {
   describe('When user email is not valid', () => {
-    let response = {};
-    let userFound = {};
     const userInvalid = {
       email: 'user@wolo.com.ar',
       password: 'hola1234'
@@ -196,8 +185,6 @@ describe('/users/sessions [POST]', () => {
   });
 
   describe('When user is not registered', () => {
-    let response = {};
-    let userFound = {};
     const user = {
       email: 'user@wolox.com.ar',
       password: 'hola1234'
@@ -223,8 +210,6 @@ describe('/users/sessions [POST]', () => {
   });
 
   describe('When user is registered', () => {
-    let response = {};
-    let userFound = {};
     const userRegister = {
       email: 'user@wolox.com.ar',
       password: 'hola1234'

@@ -1,6 +1,7 @@
 const weetService = require('../services/weets');
 const randomContentService = require('../services/random_content');
 const { serializeWeets } = require('../serializers/weets');
+const { pagination } = require('../mappers/paginations');
 
 exports.createWeet = async (req, res, next) => {
   try {
@@ -18,7 +19,8 @@ exports.createWeet = async (req, res, next) => {
 
 exports.listWeets = async (req, res, next) => {
   try {
-    const { rawListWeets, page, limit } = await weetService.listWeets(req.query.page, req.query.limit);
+    const { page, limit } = pagination(req);
+    const rawListWeets = await weetService.listWeets(page, limit);
     return res.status(200).json(serializeWeets(rawListWeets, page, limit));
   } catch (error) {
     return next(error);
