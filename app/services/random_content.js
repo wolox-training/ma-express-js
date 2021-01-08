@@ -2,10 +2,13 @@ const axios = require('axios');
 const logger = require('../logger');
 const errors = require('../errors');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
-const { urlRandomContent } = require('../../config').common.session;
+const { url } = require('../../config').common.jokesApi;
 
 const generateContent = async () => {
-  const { data: randomContent } = await axios.get(urlRandomContent);
+  const { data: randomContent } = await axios.request({
+    method: 'GET',
+    url: `${url}/api?format=json`
+  });
   return randomContent;
 };
 
