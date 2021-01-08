@@ -34,7 +34,8 @@ module.exports = {
       },
       created_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        isIn: [1, -1]
       },
       updated_at: {
         type: Sequelize.DATE,
