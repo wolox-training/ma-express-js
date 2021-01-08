@@ -59,3 +59,14 @@ exports.paginationSchema = {
     errorMessage: errorsCatalog.PAGINATION_ERROR
   }
 };
+
+exports.ratingSchema = {
+  rating: {
+    in: ['body'],
+    isIn: {
+      options: [['1', '-1']]
+    },
+    toInt: true,
+    errorMessage: errorsCatalog.RATING_ERROR
+  }
+};

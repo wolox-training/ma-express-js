@@ -26,3 +26,15 @@ exports.listWeets = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.rateWeet = (req, res, next) => {
+  try {
+    const { rating } = req.body;
+    if (rating === 0) {
+      console.log(req.params);
+    }
+    return res.sendStatus(201);
+  } catch (error) {
+    return next(error);
+  }
+};
