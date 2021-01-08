@@ -5,6 +5,8 @@ const weetService = require('../../app/services/weets');
 const sessionsManager = require('../../app/services/sessions_manager');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
+let { response } = require('../vars');
+const { expiredToken } = require('../vars');
 
 const { create: createUser } = require('../../test/factory/users');
 
@@ -25,9 +27,6 @@ const hashPassword = async password => {
 
 let rawUser = {};
 const weetsEndpoint = '/weets';
-let response = {};
-const expiredToken =
-  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxOToyODowMi45MjZaIn0.6ggVjEzgW7tjPLd_89qcDNVPD4NdqpCf0LCGsjEZBYU';
 
 describe('/weets [POST]', () => {
   beforeEach(async () => {
@@ -69,45 +68,17 @@ describe('/weets [POST]', () => {
   });
 
   describe('When token is valid', () => {
-    describe('When userId not exists in DB', () => {
-      let weetFound = {};
-      let rawFakeUser = {};
-      const fakeUser = {
-        id: 2
-      };
-      beforeAll(async () => {
-        rawFakeUser = sessionsManager.generateToken(fakeUser);
-        response = await postRequest(weetsEndpoint, rawFakeUser.token);
-        weetFound = await weetService.findById(1);
-      });
-
-      test('Receive status code 503.', () => expect(response.statusCode).toBe(503));
-
-      test(`Receive an ${errors.DATABASE_ERROR} code`, () =>
-        expect(response.body.internal_code).toEqual(errors.DATABASE_ERROR));
-
-      test(`Receive an '${errorsCatalog.USER_NOT_EXIST_ERROR}' message`, () =>
-        expect(response.body.message).toBe(errorsCatalog.USER_NOT_EXIST_ERROR));
-
-      test('The weet was not saved in the DB.', () => expect(weetFound).toBeFalsy());
+    let weetFound = {};
+    beforeAll(async () => {
+      response = await postRequest(weetsEndpoint, rawUser.token);
+      weetFound = await weetService.findById(1);
     });
 
-    describe('When userId exists in DB', () => {
-      let weetFound = {};
-      beforeAll(async () => {
-        response = await postRequest(weetsEndpoint, rawUser.token);
-        weetFound = await weetService.findById(1);
-      });
+    test('Receive status code 201.', () => expect(response.statusCode).toBe(201));
 
-      test('Receive status code 200.', () => expect(response.statusCode).toBe(200));
+    test('Weet contain less than 140 characters.', () =>
+      expect(weetFound.dataValues.content.length).toBeLessThanOrEqual(140));
 
-      test('Response contains status and description params', () =>
-        expect(Object.keys(response.body)).toContain('status', 'description'));
-
-      test('Weet contain less than 140 characters.', () =>
-        expect(weetFound.dataValues.content.length).toBeLessThanOrEqual(140));
-
-      test('The weet was saved in the DB.', () => expect(weetFound).toBeTruthy());
-    });
+    test('The weet was saved in the DB.', () => expect(weetFound).toBeTruthy());
   });
 });

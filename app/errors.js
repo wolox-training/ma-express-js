@@ -27,5 +27,5 @@ exports.tokenExpirationError = message => internalError(message, exports.TOKEN_E
 exports.FORBIDDEN_ERROR = 'forbidden_error';
 exports.forbiddenError = message => internalError(message, exports.FORBIDDEN_ERROR);
 
-exports.EXTERNAL_API_ERROR = 'external_api_error';
-exports.externalApiError = message => internalError(message, exports.EXTERNAL_API_ERROR);
+exports.JOKE_API_ERROR = 'joke_api_error';
+exports.jokeApiError = message => internalError(message, exports.JOKE_API_ERROR);

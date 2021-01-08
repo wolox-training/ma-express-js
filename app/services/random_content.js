@@ -2,11 +2,13 @@ const axios = require('axios');
 const logger = require('../logger');
 const errors = require('../errors');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
-
-const urlRandomContent = 'https://geek-jokes.sameerkumar.website/api?format=json';
+const { url } = require('../../config').common.jokesApi;
 
 const generateContent = async () => {
-  const { data: randomContent } = await axios.get(urlRandomContent);
+  const { data: randomContent } = await axios.request({
+    method: 'GET',
+    url: `${url}/api?format=json`
+  });
   return randomContent;
 };
 
@@ -18,7 +20,7 @@ exports.randomContent = async () => {
     } while (randomContent.joke.length > 140);
     return randomContent;
   } catch (error) {
-    logger.error(errorsCatalog.EXTERNAL_API_ERROR);
-    throw errors.externalApiError(errorsCatalog.EXTERNAL_API_ERROR);
+    logger.error(errorsCatalog.JOKE_API_ERROR);
+    throw errors.jokeApiError(errorsCatalog.JOKE_API_ERROR);
   }
 };
