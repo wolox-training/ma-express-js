@@ -8,7 +8,8 @@ exports.config = {
 
     session: {
       secret: 'some-super-secret',
-      expirationDays: 1
+      expirationDays: 1,
+      urlRandomContent: 'https://geek-jokes.sameerkumar.website/api?format=json'
     }
   }
 };

@@ -11,7 +11,7 @@ const statusCodes = {
   [errors.AUTHORIZATION_ERROR]: 401,
   [errors.TOKEN_EXPIRATION_ERROR]: 401,
   [errors.FORBIDDEN_ERROR]: 403,
-  [errors.EXTERNAL_API_ERROR]: 500
+  [errors.JOKE_API_ERROR]: 503
 };
 
 exports.handle = (error, req, res, next) => {

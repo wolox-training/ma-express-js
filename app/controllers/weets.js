@@ -9,7 +9,7 @@ exports.createWeet = async (req, res, next) => {
       creatorId: req.userId
     };
     await weetService.createWeet(weet);
-    return res.json({ status: 201, describe: 'Weet created.' });
+    return res.sendStatus(201);
   } catch (error) {
     return next(error);
   }
