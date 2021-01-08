@@ -5,6 +5,7 @@ const userService = require('../../app/services/users');
 const sessionsManager = require('../../app/services/sessions_manager');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
+let { response, userFound } = require('../vars');
 
 const { create: createUser } = require('../../test/factory/users');
 
@@ -45,7 +46,6 @@ describe('/admin/users [POST]', () => {
   });
 
   describe('When Authorization header is missing', () => {
-    let response = {};
     beforeAll(async () => {
       response = await request
         .post(adminEndpoint)
@@ -63,7 +63,6 @@ describe('/admin/users [POST]', () => {
   });
 
   describe('When user is not admin', () => {
-    let response = {};
     let rawRegular = {};
     beforeAll(async () => {
       const regularUser = {
@@ -87,8 +86,6 @@ describe('/admin/users [POST]', () => {
   describe('When user is admin', () => {
     describe('When send a new user', () => {
       let userExists = {};
-      let userFound = {};
-      let response = {};
       beforeAll(async () => {
         userExists = await userService.findByEmail(newUser.email);
         response = await postUser(adminEndpoint, newUser, rawAdmin.token);
@@ -108,8 +105,6 @@ describe('/admin/users [POST]', () => {
 
     describe('When user exists and its not an admin', () => {
       let userExists = {};
-      let userFound = {};
-      let response = {};
       beforeAll(async () => {
         const user = {
           email: 'existent.email@wolox.com.ar',
@@ -138,8 +133,6 @@ describe('/admin/users [POST]', () => {
     });
 
     describe('with a short password', () => {
-      let response = {};
-      let userFound = {};
       const user = {
         email: 'upgradeable.user@wolox.com.ar',
         password: 'hola',
@@ -163,8 +156,6 @@ describe('/admin/users [POST]', () => {
     });
 
     describe('with non alphanumeric password', () => {
-      let response = {};
-      let userFound = {};
       const user = {
         email: 'upgradeable.user@wolox.com.ar',
         password: 'hola@123',
@@ -188,8 +179,6 @@ describe('/admin/users [POST]', () => {
     });
 
     describe('without email, password, name and last_name', () => {
-      let response = {};
-      let userFound = {};
       const bodyParams = ['email', 'password', 'name', 'last_name'];
       const errorMessageMap = {
         email: [errorsCatalog.EMAIL_ERROR],

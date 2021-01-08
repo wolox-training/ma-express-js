@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const userService = require('../services/users');
 const { generateToken } = require('../services/sessions_manager');
 const { serializeUsers } = require('../serializers/users');
+const { pagination } = require('../mappers/paginations');
 
 const hashPassword = async password => {
   const salt = await bcrypt.genSaltSync(10);
@@ -41,7 +42,8 @@ exports.signIn = (req, res, next) => {
 
 exports.listUsers = async (req, res, next) => {
   try {
-    const { rawListUsers, page, limit } = await userService.listUsers(req.query.page, req.query.limit);
+    const { page, limit } = pagination(req);
+    const rawListUsers = await userService.listUsers(page, limit);
     return res.status(200).json(serializeUsers(rawListUsers, page, limit));
   } catch (error) {
     return next(error);

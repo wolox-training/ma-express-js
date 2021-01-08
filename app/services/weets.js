@@ -14,3 +14,12 @@ exports.findById = id =>
     logger.error('Error while trying to get weet by ID.', error.message);
     throw errors.databaseError(error.message);
   });
+
+exports.listWeets = async (page, limit) => {
+  const offset = (page - 1) * limit;
+  const rawListWeets = await Weet.findAll({ offset, limit }).catch(error => {
+    logger.error('Error while trying to get weets', error.message);
+    throw errors.databaseError(error.message);
+  });
+  return rawListWeets;
+};

@@ -5,6 +5,8 @@ const weetService = require('../../app/services/weets');
 const sessionsManager = require('../../app/services/sessions_manager');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
+let { response } = require('../vars');
+const { expiredToken } = require('../vars');
 
 const { create: createUser } = require('../../test/factory/users');
 
@@ -25,9 +27,6 @@ const hashPassword = async password => {
 
 let rawUser = {};
 const weetsEndpoint = '/weets';
-let response = {};
-const expiredToken =
-  'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiaXNzIjoiSldUIiwiZXhwIjoiMjAyMS0wMS0wNFQxOToyODowMi45MjZaIn0.6ggVjEzgW7tjPLd_89qcDNVPD4NdqpCf0LCGsjEZBYU';
 
 describe('/weets [POST]', () => {
   beforeEach(async () => {

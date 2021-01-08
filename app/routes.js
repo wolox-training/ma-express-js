@@ -1,6 +1,6 @@
 const { healthCheck } = require('./controllers/healthCheck');
 const { signUp, signIn, listUsers } = require('./controllers/users');
-const { createWeet } = require('./controllers/weets');
+const { createWeet, listWeets } = require('./controllers/weets');
 const paramsValidator = require('./middlewares/params_validator');
 const {
   emailExists,
@@ -33,4 +33,9 @@ exports.init = app => {
     signUp(true)
   );
   app.post('/weets', [checkAuthentication], createWeet);
+  app.get(
+    '/weets',
+    [checkAuthentication, paramsValidator.validateSchemaAndFail(paginationSchema)],
+    listWeets
+  );
 };
