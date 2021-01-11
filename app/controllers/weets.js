@@ -1,7 +1,9 @@
 const weetService = require('../services/weets');
 const randomContentService = require('../services/random_content');
+const calificationsService = require('../services/califications');
 const { serializeWeets } = require('../serializers/weets');
 const { pagination } = require('../mappers/paginations');
+const { mapCalificationParams } = require('../mappers/califications');
 
 exports.createWeet = async (req, res, next) => {
   try {
@@ -27,12 +29,10 @@ exports.listWeets = async (req, res, next) => {
   }
 };
 
-exports.rateWeet = (req, res, next) => {
+exports.rateWeet = async (req, res, next) => {
   try {
-    const { rating } = req.body;
-    if (rating === 0) {
-      console.log(req.params);
-    }
+    const calification = mapCalificationParams(req);
+    await calificationsService.saveScoreAndUpdatePosition(calification);
     return res.sendStatus(201);
   } catch (error) {
     return next(error);
