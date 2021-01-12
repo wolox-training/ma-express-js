@@ -32,6 +32,8 @@ exports.listWeets = async (req, res, next) => {
 exports.rateWeet = async (req, res, next) => {
   try {
     const calification = mapCalificationParams(req);
+    const repeatedVote = await calificationsService.findSameRating(calification);
+    if (repeatedVote) return res.sendStatus(202);
     await calificationsService.saveScoreAndUpdatePosition(calification);
     return res.sendStatus(201);
   } catch (error) {

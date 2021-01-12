@@ -13,6 +13,11 @@ const getScores = rawWeetsArray =>
     })
   );
 
+const findVotedWeet = calification => {
+  const { weetId, ratingUserId } = calification;
+  return Calification.findOne({ where: { ratingUserId, weetId } });
+};
+
 exports.saveScoreAndUpdatePosition = async calification => {
   let transaction = {};
   try {
@@ -31,7 +36,12 @@ exports.saveScoreAndUpdatePosition = async calification => {
     const positionByScore = getPosition(puntajeUser);
     const actualPosition = user.position;
 
-    await Calification.create(calification, { transaction });
+    const existsVotedWeet = await findVotedWeet(calification);
+    if (existsVotedWeet && existsVotedWeet.dataValues.score !== calification.score) {
+      existsVotedWeet.score = calification.score;
+      await existsVotedWeet.save({ transaction });
+    } else await Calification.create(calification, { transaction });
+
     if (actualPosition !== positionByScore) {
       user.position = positionByScore;
       await user.save({ transaction });
@@ -50,3 +60,8 @@ exports.findById = id =>
     logger.error('Error while trying to get calification by ID.', error.message);
     throw errors.databaseError(error.message);
   });
+
+exports.findSameRating = req => {
+  const { weetId, ratingUserId, score } = req;
+  return Calification.findOne({ where: { ratingUserId, weetId, score } });
+};

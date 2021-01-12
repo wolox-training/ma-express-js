@@ -88,7 +88,7 @@ describe('/weets [POST]', () => {
 });
 
 describe('/weets/:id/ratings [POST]', () => {
-  const calificationParamsEndpoint = `${weetsEndpoint}/1/ratings`;
+  const rateEndpoint = `${weetsEndpoint}/1/ratings`;
   beforeEach(async () => {
     const userLogin = {
       email: 'regular.user@wolox.com.ar',
@@ -102,7 +102,7 @@ describe('/weets/:id/ratings [POST]', () => {
   describe('When Authorization header is missing', () => {
     beforeAll(async () => {
       response = await request
-        .post(calificationParamsEndpoint)
+        .post(rateEndpoint)
         .set('Accept', 'application/json')
         .send();
     });
@@ -117,7 +117,7 @@ describe('/weets/:id/ratings [POST]', () => {
   });
 
   describe('When token is expired', () => {
-    beforeAll(async () => (response = await postRequest(calificationParamsEndpoint, expiredToken)));
+    beforeAll(async () => (response = await postRequest(rateEndpoint, expiredToken)));
 
     test('Receive status code 401.', () => expect(response.statusCode).toBe(401));
 
@@ -130,12 +130,9 @@ describe('/weets/:id/ratings [POST]', () => {
 
   describe('When token is valid', () => {
     let calificationFound = {};
-    const score = { rating: 1 };
     beforeAll(async () => {
-      const weet = { creatorId: 1 };
-      await createWeet(weet);
-      await createWeet(weet);
-      response = await postRequest(calificationParamsEndpoint, rawUser.token, score);
+      await createWeet({ creatorId: 1 });
+      response = await postRequest(rateEndpoint, rawUser.token, { rating: 1 });
       calificationFound = await calificationService.findById(1);
     });
 
@@ -147,22 +144,30 @@ describe('/weets/:id/ratings [POST]', () => {
   describe('When user receives a positive rating and ascends to next position', () => {
     const positionsMap = ['Developer', 'Lead', 'TL', 'EM', 'HEAD', 'CEO'];
     const thresholdArray = [4, 9, 19, 29, 49];
-
-    const newCalification = { ratingUserId: 1, weetId: 1, score: 1 };
-    const weet = { creatorId: 1 };
     let userPre = {};
     let userPost = {};
 
     thresholdArray.forEach((element, index) => {
       describe(`When user has ${element} points`, () => {
         beforeAll(async () => {
-          await createWeet(weet);
+          await createWeet({ creatorId: 1 });
+
+          const randomUser1 = await createUser();
+          const tokenUser1 = sessionsManager.generateToken(randomUser1.dataValues);
+          const randomUser2 = await createUser();
+          const tokenUser2 = sessionsManager.generateToken(randomUser2.dataValues);
+
+          const newCalification = { ratingUserId: 1, weetId: 1, score: 1 };
           for (let i = 1; i < element; i++) await createCalification(newCalification);
 
-          response = await postRequest(calificationParamsEndpoint, rawUser.token, { rating: 1 });
+          response = await postRequest(rateEndpoint, tokenUser1.token, {
+            rating: 1
+          });
           userPre = await userService.findById(1);
 
-          response = await postRequest(calificationParamsEndpoint, rawUser.token, { rating: 1 });
+          response = await postRequest(rateEndpoint, tokenUser2.token, {
+            rating: 1
+          });
           userPost = await userService.findById(1);
         });
 
@@ -180,22 +185,30 @@ describe('/weets/:id/ratings [POST]', () => {
   describe('When user receives a negative rating and descends to previous position', () => {
     const positionsMap = ['Developer', 'Lead', 'TL', 'EM', 'HEAD', 'CEO'];
     const thresholdArray = [4, 9, 19, 29, 49];
-
-    const newCalification = { ratingUserId: 1, weetId: 1, score: 1 };
-    const weet = { creatorId: 1 };
     let userPre = {};
     let userPost = {};
 
     thresholdArray.forEach((element, index) => {
       describe(`When user has ${element + 1} points`, () => {
-        beforeAll(async () => {
-          await createWeet(weet);
+        beforeEach(async () => {
+          await createWeet({ creatorId: 1 });
+
+          const randomUser1 = await createUser();
+          const tokenUser1 = sessionsManager.generateToken(randomUser1.dataValues);
+          const randomUser2 = await createUser();
+          const tokenUser2 = sessionsManager.generateToken(randomUser2.dataValues);
+
+          const newCalification = { ratingUserId: 1, weetId: 1, score: 1 };
           for (let i = 1; i < element + 1; i++) await createCalification(newCalification);
 
-          response = await postRequest(calificationParamsEndpoint, rawUser.token, { rating: 1 });
+          response = await postRequest(rateEndpoint, tokenUser1.token, {
+            rating: 1
+          });
           userPre = await userService.findById(1);
 
-          response = await postRequest(calificationParamsEndpoint, rawUser.token, { rating: -1 });
+          response = await postRequest(rateEndpoint, tokenUser2.token, {
+            rating: -1
+          });
           userPost = await userService.findById(1);
         });
 
@@ -210,26 +223,51 @@ describe('/weets/:id/ratings [POST]', () => {
     });
   });
 
-  describe('When rate an invalid weet', () => {
-    const badCalificationParamsEndpoint = `${weetsEndpoint}/3/ratings`;
-    let calificationFound = {};
-    const score = { rating: 1 };
-    beforeAll(async () => {
-      const weet = { creatorId: 1 };
-      await createWeet(weet);
-      await createWeet(weet);
-      response = await postRequest(badCalificationParamsEndpoint, rawUser.token, score);
-      calificationFound = await calificationService.findById(1);
+  describe('When user change his last rating', () => {
+    let ratingPre = {};
+    let ratingPost = {};
+    let duplicatedRating = {};
+    beforeEach(async () => {
+      await createWeet({ creatorId: 1 });
+      await createCalification({ ratingUserId: 1, weetId: 1, score: 1 });
+      ratingPre = await calificationService.findById(1);
+      response = await postRequest(rateEndpoint, rawUser.token, { rating: -1 });
+      ratingPost = await calificationService.findById(1);
+      duplicatedRating = await calificationService.findById(2);
     });
 
-    test('Receive status code 503.', () => expect(response.statusCode).toBe(503));
+    test('The calification exists in the DB.', () => expect(ratingPre).toBeTruthy());
 
-    test(`Receive an ${errors.DATABASE_ERROR} code`, () =>
-      expect(response.body.internal_code).toEqual(errors.DATABASE_ERROR));
+    test('The previously rating is positive.', () => expect(ratingPre.dataValues.score).toBe(1));
 
-    test(`Receive an '${errorsCatalog.CALIFICATION_ERROR}' message`, () =>
-      expect(response.body.message).toBe(errorsCatalog.CALIFICATION_ERROR));
+    test('Receive status code 201.', () => expect(response.statusCode).toBe(201));
 
-    test('The calification was not saved in the DB.', () => expect(calificationFound).toBeFalsy());
+    test('The calification was updated.', () => expect(ratingPost.dataValues.score).toBe(-1));
+
+    test('Another calification was not created in the DB.', () => expect(duplicatedRating).toBeFalsy());
+  });
+
+  describe('When user repeat his last rating', () => {
+    let ratingPre = {};
+    let ratingPost = {};
+    let duplicatedRating = {};
+    beforeEach(async () => {
+      await createWeet({ creatorId: 1 });
+      await createCalification({ ratingUserId: 1, weetId: 1, score: 1 });
+      ratingPre = await calificationService.findById(1);
+      response = await postRequest(rateEndpoint, rawUser.token, { rating: 1 });
+      ratingPost = await calificationService.findById(1);
+      duplicatedRating = await calificationService.findById(2);
+    });
+
+    test('The calification exists in the DB.', () => expect(ratingPre).toBeTruthy());
+
+    test('The previously rating is positive.', () => expect(ratingPre.dataValues.score).toBe(1));
+
+    test('Receive status code 202.', () => expect(response.statusCode).toBe(202));
+
+    test('The calification was not updated.', () => expect(ratingPost.dataValues.score).toBe(1));
+
+    test('Another calification was not created in the DB.', () => expect(duplicatedRating).toBeFalsy());
   });
 });
