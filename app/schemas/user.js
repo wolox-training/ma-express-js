@@ -67,6 +67,7 @@ exports.ratingSchema = {
       options: [['1', '-1']]
     },
     toInt: true,
+    exists: true,
     errorMessage: errorsCatalog.RATING_ERROR
   }
 };
