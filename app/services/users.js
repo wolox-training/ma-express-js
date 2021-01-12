@@ -33,3 +33,8 @@ exports.findById = id =>
     logger.error('Error while trying to get user by ID', error.message);
     throw errors.databaseError(error.message);
   });
+
+exports.updatePosition = async (user, position) => {
+  user.position = position;
+  await user.save();
+};

@@ -5,3 +5,9 @@ exports.getPosition = score => {
   const found = positionThreshold.findIndex(element => score > element);
   return found < 0 ? positions.slice(-1).pop() : positions[found];
 };
+
+exports.mapCalificationParams = req => ({
+  ratingUserId: req.userId,
+  score: req.body.rating,
+  weetId: Number(req.params.id)
+});

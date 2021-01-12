@@ -1,6 +1,6 @@
 const { healthCheck } = require('./controllers/healthCheck');
 const { signUp, signIn, listUsers } = require('./controllers/users');
-const { createWeet, listWeets } = require('./controllers/weets');
+const { createWeet, listWeets, rateWeet } = require('./controllers/weets');
 const paramsValidator = require('./middlewares/params_validator');
 const {
   emailExists,
@@ -8,7 +8,7 @@ const {
   checkAuthentication,
   checkAdmin
 } = require('./middlewares/users');
-const { signUpSchema, emailSchema, paginationSchema } = require('./schemas/user');
+const { signUpSchema, emailSchema, paginationSchema, ratingSchema } = require('./schemas/user');
 
 exports.init = app => {
   app.get('/health', healthCheck);
@@ -37,5 +37,10 @@ exports.init = app => {
     '/weets',
     [checkAuthentication, paramsValidator.validateSchemaAndFail(paginationSchema)],
     listWeets
+  );
+  app.post(
+    '/weets/:id/ratings',
+    [checkAuthentication, paramsValidator.validateSchemaAndFail(ratingSchema)],
+    rateWeet
   );
 };
