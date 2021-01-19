@@ -1,5 +1,5 @@
 const { healthCheck } = require('./controllers/healthCheck');
-const { signUp, signIn, listUsers } = require('./controllers/users');
+const { signUp, signIn, listUsers, invalidateSessions } = require('./controllers/users');
 const { createWeet, listWeets, rateWeet } = require('./controllers/weets');
 const paramsValidator = require('./middlewares/params_validator');
 const {
@@ -43,4 +43,5 @@ exports.init = app => {
     [checkAuthentication, paramsValidator.validateSchemaAndFail(ratingSchema)],
     rateWeet
   );
+  app.post('/users/sessions/invalidate_all', [checkAuthentication], invalidateSessions);
 };
