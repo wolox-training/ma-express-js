@@ -9,6 +9,7 @@ const { expiredToken } = require('../vars');
 
 const { create: createUser } = require('../factory/users');
 const { create: createWeet } = require('../factory/weets');
+const { create: createSession } = require('../factory/sessions');
 
 const request = supertest(app);
 
@@ -49,7 +50,10 @@ describe('/weets [GET]', () => {
 
   describe('When token is expired', () => {
     describe('Fail with pagination params', () => {
-      beforeAll(async () => (response = await getWeets('/weets?page=1&limit=2', expiredToken)));
+      beforeAll(async () => {
+        await createSession({ token: expiredToken });
+        response = await getWeets('/weets?page=1&limit=2', expiredToken);
+      });
 
       test('Receive status code 401.', () => expect(response.statusCode).toBe(401));
 
@@ -68,6 +72,7 @@ describe('/weets [GET]', () => {
         await createWeet(weet);
         await createWeet(weet);
         await createWeet(weet);
+        await createSession({ token: rawToken.token });
         response = await getWeets('/weets?page=1&limit=2', rawToken.token);
       });
 
@@ -95,6 +100,7 @@ describe('/weets [GET]', () => {
         await createWeet(weet);
         await createWeet(weet);
         await createWeet(weet);
+        await createSession({ token: rawToken.token });
         response = await getWeets('/weets', rawToken.token);
       });
 
@@ -118,7 +124,10 @@ describe('/weets [GET]', () => {
     });
 
     describe('Empty response with out of range params', () => {
-      beforeAll(async () => (response = await getWeets('/weets?page=3&limit=2', rawToken.token)));
+      beforeAll(async () => {
+        await createSession({ token: rawToken.token });
+        response = await getWeets('/weets?page=3&limit=2', rawToken.token);
+      });
 
       test('Receive status code 200.', () => expect(response.statusCode).toBe(200));
 
@@ -129,7 +138,10 @@ describe('/weets [GET]', () => {
     });
 
     describe('Fail with non integer params', () => {
-      beforeAll(async () => (response = await getWeets('/weets?page=a&limit=2', rawToken.token)));
+      beforeAll(async () => {
+        await createSession({ token: rawToken.token });
+        response = await getWeets('/weets?page=a&limit=2', rawToken.token);
+      });
 
       test('Receive status code 400.', () => expect(response.statusCode).toBe(400));
 

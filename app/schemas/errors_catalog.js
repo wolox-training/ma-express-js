@@ -12,5 +12,6 @@ module.exports = {
   EXTERNAL_API_ERROR: 'Error while trying to get random weet content.',
   USER_NOT_EXIST_ERROR: 'The user does not exists.',
   CALIFICATION_ERROR: 'An error ocurred while trying to save the calification.',
-  RATING_ERROR: 'Rating must be 1 or -1.'
+  RATING_ERROR: 'Rating must be 1 or -1.',
+  SESSION_ERROR: 'The token was invalidated by user.'
 };

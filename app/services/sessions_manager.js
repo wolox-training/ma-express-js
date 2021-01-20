@@ -23,9 +23,9 @@ exports.generateToken = user => {
   };
 };
 
-exports.checkToken = authString => {
+exports.checkToken = token => {
   try {
-    const payload = exports.decode(authString.replace(/^Bearer\s+/, ''), secret);
+    const payload = exports.decode(token, secret);
     if (!moment().isBefore(payload.exp)) return false;
     return payload;
   } catch (error) {
@@ -39,8 +39,20 @@ exports.sessionRegister = session =>
     throw errors.databaseError(error.message);
   });
 
+exports.sessionExists = token =>
+  Session.findOne({ where: { token } }).catch(error => {
+    logger.error('Error while trying to obtain sessions', error.message);
+    throw errors.databaseError(error.message);
+  });
+
 exports.removeSessions = user =>
   Session.destroy({ where: { userId: user } }).catch(error => {
-    logger.error('Error while trying to remove sessions', error.message);
+    logger.error('Error while trying to remove sessions by user', error.message);
+    throw errors.databaseError(error.message);
+  });
+
+exports.removeSession = token =>
+  Session.destroy({ where: { token } }).catch(error => {
+    logger.error('Error while trying to remove session by token', error.message);
     throw errors.databaseError(error.message);
   });

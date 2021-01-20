@@ -236,7 +236,7 @@ describe('/users/sessions/invalidate_all [POST]', () => {
         userLogin.password = await hashPassword('hola1234');
         const createdUser = await createUser(userLogin);
         rawUser = sessionsManager.generateToken(createdUser.dataValues);
-        await createSession();
+        await createSession({ token: rawUser.token });
         sessionFoundPre = await Session.findAll({ where: { userId: createdUser.dataValues.id } });
         response = await postRequest('/users/sessions/invalidate_all', rawUser.token);
         sessionFoundPost = await Session.findAll({ where: { userId: createdUser.dataValues.id } });

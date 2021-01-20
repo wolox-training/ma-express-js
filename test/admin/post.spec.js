@@ -8,6 +8,7 @@ const errors = require('../../app/errors');
 let { response, userFound } = require('../vars');
 
 const { create: createUser } = require('../../test/factory/users');
+const { create: createSession } = require('../factory/sessions');
 
 const request = supertest(app);
 
@@ -71,6 +72,7 @@ describe('/admin/users [POST]', () => {
       };
       const createdRegularUser = await createUser(regularUser);
       rawRegular = sessionsManager.generateToken(createdRegularUser.dataValues);
+      await createSession({ token: rawRegular.token });
       response = await postUser(adminEndpoint, newUser, rawRegular.token);
     });
 
@@ -88,6 +90,7 @@ describe('/admin/users [POST]', () => {
       let userExists = {};
       beforeAll(async () => {
         userExists = await userService.findByEmail(newUser.email);
+        await createSession({ token: rawAdmin.token });
         response = await postUser(adminEndpoint, newUser, rawAdmin.token);
         userFound = await userService.findByEmail(newUser.email);
       });
@@ -115,6 +118,7 @@ describe('/admin/users [POST]', () => {
         };
         await createUser(user);
         userExists = await userService.findByEmail(user.email);
+        await createSession({ token: rawAdmin.token });
         response = await postUser(adminEndpoint, user, rawAdmin.token);
         userFound = await userService.findByEmail(user.email);
       });
