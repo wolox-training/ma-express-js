@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const userService = require('../services/users');
-const { generateToken } = require('../services/sessions_manager');
+const { removeSessions } = require('../services/sessions_manager');
+const { generateToken, sessionRegister } = require('../services/sessions_manager');
 const { serializeUsers } = require('../serializers/users');
 const { pagination } = require('../mappers/paginations');
 
@@ -30,10 +31,16 @@ exports.signUp = isAdmin => async (req, res, next) => {
   }
 };
 
-exports.signIn = (req, res, next) => {
+exports.signIn = async (req, res, next) => {
   try {
     const { user } = req;
     const responseWithToken = generateToken(user);
+    const session = {
+      token: responseWithToken.token,
+      expiresIn: responseWithToken.exp,
+      userId: user.id
+    };
+    await sessionRegister(session);
     return res.status(200).json(responseWithToken);
   } catch (error) {
     return next(error);
@@ -45,6 +52,15 @@ exports.listUsers = async (req, res, next) => {
     const { page, limit } = pagination(req);
     const rawListUsers = await userService.listUsers(page, limit);
     return res.status(200).json(serializeUsers(rawListUsers, page, limit));
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.invalidateSessions = async (req, res, next) => {
+  try {
+    await removeSessions(req.userId);
+    return res.sendStatus(200);
   } catch (error) {
     return next(error);
   }

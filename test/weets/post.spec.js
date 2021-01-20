@@ -10,9 +10,10 @@ const errors = require('../../app/errors');
 let { response } = require('../vars');
 const { expiredToken } = require('../vars');
 
-const { create: createUser } = require('../../test/factory/users');
+const { create: createUser } = require('../factory/users');
 const { create: createWeet } = require('../factory/weets');
 const { create: createCalification } = require('../factory/califications');
+const { create: createSession } = require('../factory/sessions');
 
 const request = supertest(app);
 
@@ -60,7 +61,11 @@ describe('/weets [POST]', () => {
   });
 
   describe('When token is expired', () => {
-    beforeAll(async () => (response = await postRequest(weetsEndpoint, expiredToken)));
+    beforeAll(async () => {
+      await createUser();
+      await createSession({ token: expiredToken });
+      response = await postRequest(weetsEndpoint, expiredToken);
+    });
 
     test('Receive status code 401.', () => expect(response.statusCode).toBe(401));
 
@@ -74,6 +79,8 @@ describe('/weets [POST]', () => {
   describe('When token is valid', () => {
     let weetFound = {};
     beforeAll(async () => {
+      await createUser();
+      await createSession({ token: rawUser.token });
       response = await postRequest(weetsEndpoint, rawUser.token);
       weetFound = await weetService.findById(1);
     });
@@ -97,6 +104,7 @@ describe('/weets/:id/ratings [POST]', () => {
     userLogin.password = await hashPassword('hola1234');
     const createdUser = await createUser(userLogin);
     rawUser = sessionsManager.generateToken(createdUser.dataValues);
+    await createSession({ token: rawUser.token });
   });
 
   describe('When Authorization header is missing', () => {
@@ -117,7 +125,11 @@ describe('/weets/:id/ratings [POST]', () => {
   });
 
   describe('When token is expired', () => {
-    beforeAll(async () => (response = await postRequest(rateEndpoint, expiredToken)));
+    beforeAll(async () => {
+      // await createUser();
+      await createSession({ token: expiredToken });
+      response = await postRequest(rateEndpoint, expiredToken);
+    });
 
     test('Receive status code 401.', () => expect(response.statusCode).toBe(401));
 
@@ -154,8 +166,10 @@ describe('/weets/:id/ratings [POST]', () => {
 
           const randomUser1 = await createUser();
           const tokenUser1 = sessionsManager.generateToken(randomUser1.dataValues);
+          await createSession({ token: tokenUser1.token });
           const randomUser2 = await createUser();
           const tokenUser2 = sessionsManager.generateToken(randomUser2.dataValues);
+          await createSession({ token: tokenUser2.token });
 
           const newCalification = { ratingUserId: 1, weetId: 1, score: 1 };
           for (let i = 1; i < element; i++) await createCalification(newCalification);
@@ -195,8 +209,10 @@ describe('/weets/:id/ratings [POST]', () => {
 
           const randomUser1 = await createUser();
           const tokenUser1 = sessionsManager.generateToken(randomUser1.dataValues);
+          await createSession({ token: tokenUser1.token });
           const randomUser2 = await createUser();
           const tokenUser2 = sessionsManager.generateToken(randomUser2.dataValues);
+          await createSession({ token: tokenUser2.token });
 
           const newCalification = { ratingUserId: 1, weetId: 1, score: 1 };
           for (let i = 1; i < element + 1; i++) await createCalification(newCalification);
