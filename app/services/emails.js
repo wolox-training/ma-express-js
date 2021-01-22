@@ -3,8 +3,8 @@ const { emailUser, emailPass } = require('../../config').common.session;
 
 exports.sendEmail = user => {
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
+    host: 'smtp.ethereal.email',
+    port: 587,
     auth: {
       user: emailUser,
       pass: emailPass
