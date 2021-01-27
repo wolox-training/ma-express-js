@@ -39,7 +39,9 @@ const config = {
     session: {
       header_name: 'authorization',
       secret: process.env.SECRET_KEY,
-      expirationDays: process.env.EXPIRATION_DAYS
+      expirationDays: process.env.EXPIRATION_DAYS,
+      emailUser: process.env.EMAIL_USER,
+      emailPass: process.env.EMAIL_PASS
     },
     headers: {
       apiDate: process.env.API_DATE || 'X-API-Date',

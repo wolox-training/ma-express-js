@@ -8,7 +8,9 @@ exports.config = {
 
     session: {
       secret: 'some-super-secret',
-      expirationDays: 1
+      expirationDays: 1,
+      emailUser: 'tabitha.skiles96@ethereal.email',
+      emailPass: 'ezmS2EbPheFewJGnPT'
     }
   }
 };

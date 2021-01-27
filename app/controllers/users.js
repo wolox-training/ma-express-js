@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const userService = require('../services/users');
+const emailService = require('../services/emails');
 const { removeSessions } = require('../services/sessions_manager');
 const { generateToken, sessionRegister } = require('../services/sessions_manager');
 const { serializeUsers } = require('../serializers/users');
@@ -24,7 +25,7 @@ exports.signUp = isAdmin => async (req, res, next) => {
     };
     if (req.user) await userService.upgradeUser(req.user);
     else await userService.createUser(user);
-
+    await emailService.sendEmail(user);
     return res.sendStatus(201);
   } catch (error) {
     return next(error);

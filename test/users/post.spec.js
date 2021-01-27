@@ -1,6 +1,7 @@
 const supertest = require('supertest');
 const app = require('../../app');
 const userService = require('../../app/services/users');
+const emailService = require('../../app/services/emails');
 const errorsCatalog = require('../../app/schemas/errors_catalog');
 const errors = require('../../app/errors');
 let { response, userFound } = require('../vars');
@@ -17,6 +18,7 @@ const postUser = (endpoint, data) =>
 
 describe('/users [POST]', () => {
   describe('with complete data ', () => {
+    let emailResponse = {};
     const user = {
       email: 'complete.data@wolox.com.ar',
       password: 'hola1234',
@@ -25,7 +27,9 @@ describe('/users [POST]', () => {
     };
 
     beforeAll(async () => {
+      jest.setTimeout(30000);
       response = await postUser('/users', user);
+      emailResponse = await emailService.sendEmail(user);
       userFound = await userService.findByEmail(user.email);
     });
 
@@ -34,6 +38,8 @@ describe('/users [POST]', () => {
     it('Receive an empty response.', () => expect(response.body).toEqual({}));
 
     it('The user was saved in the DB.', () => expect(userFound).toBeTruthy());
+
+    it('The welcome email was sent.', () => expect(emailResponse.accepted).toContain(user.email));
   });
 
   describe('with an existent email ', () => {
