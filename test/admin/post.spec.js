@@ -36,6 +36,7 @@ describe('/admin/users [POST]', () => {
     last_name: 'Acosta'
   };
   beforeEach(async () => {
+    jest.setTimeout(30000);
     const username = 'admin';
     const userLogin = {
       email: `${username}@wolox.com.ar`,

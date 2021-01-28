@@ -25,7 +25,7 @@ exports.signUp = isAdmin => async (req, res, next) => {
     };
     if (req.user) await userService.upgradeUser(req.user);
     else await userService.createUser(user);
-    await emailService.sendEmail(user);
+    await emailService.sendWelcomeEmail(user);
     return res.sendStatus(201);
   } catch (error) {
     return next(error);

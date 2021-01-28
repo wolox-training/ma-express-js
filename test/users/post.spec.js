@@ -29,7 +29,7 @@ describe('/users [POST]', () => {
     beforeAll(async () => {
       jest.setTimeout(30000);
       response = await postUser('/users', user);
-      emailResponse = await emailService.sendEmail(user);
+      emailResponse = await emailService.sendWelcomeEmail(user);
       userFound = await userService.findByEmail(user.email);
     });
 
